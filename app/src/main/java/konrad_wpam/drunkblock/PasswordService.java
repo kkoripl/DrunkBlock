@@ -1,16 +1,18 @@
 package konrad_wpam.drunkblock;
 
 import android.app.ActivityManager;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +28,9 @@ import java.util.TreeMap;
 
 public class PasswordService extends Service
 {
+    String appToBeFound = "Intent.ACTION_DIAL";
     int timeForTopActivity = 1000 * 10;
+    final Context context = this;
     String lastActivity;
     public PasswordService() {
         super();
@@ -41,7 +45,7 @@ public class PasswordService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-
+        final List<String> dialerPackageName = queryAppPkgName(appToBeFound);
         Timer timer  =  new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -63,8 +67,11 @@ public class PasswordService extends Service
                         {
                             lastActivity = activePackage;
                             System.out.println("NOWA AKTYWNOSC! ==> " + lastActivity);
-                            if(lastActivity.equals("com.android.dialer")) System.out.println("TELEFON!!!!");
-                            //addNotification("TELEFON! \\ " + lastActivity);
+                            if(dialerPackageName.contains(lastActivity))
+                            {
+                                System.out.println("ZNALEZIONE DIALERY!!!!");
+                                backToMainScreen();
+                            }
                         }
                         else {
                             System.out.println(activePackage);
@@ -79,12 +86,10 @@ public class PasswordService extends Service
 
             }
         }, 20000, 6000);  // every 6 seconds
-
-
-        return START_STICKY;
+      return START_STICKY;
     }
 
-    public String[] getActivePackagesBeforeLolli()
+    private String[] getActivePackagesBeforeLolli()
     {
         final Set<String> activePackages = new HashSet<String>();
         ActivityManager am = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
@@ -99,7 +104,7 @@ public class PasswordService extends Service
         return activePackages.toArray(new String[activePackages.size()]);
     }
 
-    public String[] getActivePackagesAfterLolli()
+    private String[] getActivePackagesAfterLolli()
     {
         String[] latestActivePackage = new String[1];
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -123,23 +128,27 @@ public class PasswordService extends Service
         return null;
     }
 
-    public void addNotification(String app)
+    private void backToMainScreen()
     {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setContentText(app);
-        Intent notificationIntent = new Intent(this,PasswordService.class);
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(0,builder.build());
+        Intent getToHomeScreen = new Intent(Intent.ACTION_MAIN);
+        getToHomeScreen.addCategory(Intent.CATEGORY_HOME);
+        getToHomeScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(getToHomeScreen);
     }
 
-
-
-
-
-
-   /* @Override
-    protected void onHandleIntent(Intent gotIntent)
+    private List<String> queryAppPkgName(String appIntent)
     {
-        System.out.println("Akcja!");
-    }*/
+        List<String> appPkgNames = new ArrayList<>();
+        Intent findApp = new Intent(appIntent);
+        List<ResolveInfo> apps = context.getPackageManager().queryIntentActivities(findApp, 0);
+        for(ResolveInfo app : apps)
+        {
+            ActivityInfo ai = app.activityInfo;
+            System.out.println("DIALER: "+ai.applicationInfo.packageName);
+            appPkgNames.add(ai.applicationInfo.packageName);
+        }
+        return appPkgNames;
+    }
+
 }
 
