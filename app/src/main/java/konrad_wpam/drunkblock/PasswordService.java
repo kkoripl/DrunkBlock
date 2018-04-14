@@ -1,16 +1,23 @@
 package konrad_wpam.drunkblock;
 
 import android.app.ActivityManager;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.Telephony;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,18 +29,24 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import static android.content.Intent.makeMainSelectorActivity;
+
 /**
  * Created by Konrad on 2018-03-23.
  */
 
 public class PasswordService extends Service
 {
-    String appToBeFound = "Intent.ACTION_DIAL";
+    List<Intent> appsToBeBlocked;
+    List<String> appsInstalled;
+    Intent helperIntent = new Intent();
+    Intent appToBeFound = new Intent(Intent.ACTION_DIAL);
     int timeForTopActivity = 1000 * 10;
     final Context context = this;
     String lastActivity;
     public PasswordService() {
         super();
+        appsToBeBlocked = new ArrayList<Intent>();
     }
 
     @Nullable
@@ -45,7 +58,13 @@ public class PasswordService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        final List<String> dialerPackageName = queryAppPkgName(appToBeFound);
+        final List<String> blockedAppsPkgNames = queryAppPkgName(appToBeFound);
+        appsInstalled = getInstalledAppsPkgNames();
+        System.out.println("ZAINSTALOWANE APKI!!!!");
+        for (String app: appsInstalled)
+        {
+            System.out.println(app);
+        }
         Timer timer  =  new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -66,11 +85,13 @@ public class PasswordService extends Service
                         if(!activePackage.equals(lastActivity))
                         {
                             lastActivity = activePackage;
-                            System.out.println("NOWA AKTYWNOSC! ==> " + lastActivity);
-                            if(dialerPackageName.contains(lastActivity))
+                            System.out.println("NOWA AKTYWNOSC! ==> " + lastActivity + " / " + blockedAppsPkgNames.size());
+                            if(blockedAppsPkgNames.contains(lastActivity))
                             {
                                 System.out.println("ZNALEZIONE DIALERY!!!!");
-                                backToMainScreen();
+                                helperIntent = new Intent("drunkblocker.PASSWORD_WINDOW_AC");
+                                //helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(helperIntent);
                             }
                         }
                         else {
@@ -136,19 +157,39 @@ public class PasswordService extends Service
         startActivity(getToHomeScreen);
     }
 
-    private List<String> queryAppPkgName(String appIntent)
+    private List<String> queryAppPkgName(Intent appIntent)
     {
         List<String> appPkgNames = new ArrayList<>();
-        Intent findApp = new Intent(appIntent);
-        List<ResolveInfo> apps = context.getPackageManager().queryIntentActivities(findApp, 0);
+        List<ResolveInfo> apps = context.getPackageManager().queryIntentActivities(appIntent, 0);
         for(ResolveInfo app : apps)
         {
             ActivityInfo ai = app.activityInfo;
-            System.out.println("DIALER: "+ai.applicationInfo.packageName);
             appPkgNames.add(ai.applicationInfo.packageName);
         }
         return appPkgNames;
     }
 
+    private List<String> queryBlockedAppsPkgName(List<Intent> blockedApps)
+    {
+        List<String> blockedAppsPkgNames = new ArrayList<String>();
+        for(int i = 0; i<blockedApps.size();i++)
+        {
+            blockedAppsPkgNames.addAll(blockedAppsPkgNames.size(),queryAppPkgName(blockedApps.get(i)));
+        }
+        return blockedAppsPkgNames;
+    }
+
+    private List<String> getInstalledAppsPkgNames()
+    {
+        List<String> appsPkgNames = new ArrayList<String>();
+        final PackageManager pm = getPackageManager();
+        List<ApplicationInfo> ai = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        for (ApplicationInfo info : ai)
+        {
+            appsPkgNames.add(info.packageName);
+        }
+        return appsPkgNames;
+
+    }
 }
 

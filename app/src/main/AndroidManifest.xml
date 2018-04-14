@@ -19,6 +19,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Password_Window_Activity"
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=".Password_Window_Activity">
+            <intent-filter>
+                <action android:name="drunkblocker.PASSWORD_WINDOW_AC"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <receiver android:name=".UnlockScreenBroadcastReceiver">
         </receiver>
         <service android:name="PasswordService" />

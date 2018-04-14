@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">DrunkBlock</string>
+    <string name="ok_button">OK</string>
+    <string name="cancel_button">Anuluj</string>
+    <string name="fill_in_password">Podaj hasło</string>
+    <string name="must_implement">musi zaimplementowac</string>
 </resources>
