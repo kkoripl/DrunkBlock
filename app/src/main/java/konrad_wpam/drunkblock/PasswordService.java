@@ -1,9 +1,7 @@
 package konrad_wpam.drunkblock;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -11,13 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.Telephony;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +27,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 import static android.content.Intent.makeMainSelectorActivity;
+import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 /**
  * Created by Konrad on 2018-03-23.
@@ -39,8 +37,10 @@ public class PasswordService extends Service
 {
     List<Intent> appsToBeBlocked;
     List<String> appsInstalled;
+    List<String> sms, ph, sms2;
     Intent helperIntent = new Intent();
     Intent appToBeFound = new Intent(Intent.ACTION_DIAL);
+    Intent smsIntent = new Intent(Intent.ACTION_SEND);
     int timeForTopActivity = 1000 * 10;
     final Context context = this;
     String lastActivity;
@@ -60,6 +60,27 @@ public class PasswordService extends Service
     {
         final List<String> blockedAppsPkgNames = queryAppPkgName(appToBeFound);
         appsInstalled = getInstalledAppsPkgNames();
+
+        smsIntent.setType("text/plain");
+        smsIntent.putExtra(Intent.EXTRA_TEXT,"content");
+        sms = queryAppPkgName(smsIntent);
+        sms2 = getSms();
+        ph = getPhone();
+        System.out.println("SMS!!!!");
+        for (String app: sms)
+        {
+            System.out.println(app);
+        }
+        System.out.println("SMS2!!!!");
+        for (String app: sms2)
+        {
+            System.out.println(app);
+        }
+        System.out.println("PHONE!!!!");
+        for (String app: ph)
+        {
+            System.out.println(app);
+        }
         System.out.println("ZAINSTALOWANE APKI!!!!");
         for (String app: appsInstalled)
         {
@@ -84,15 +105,15 @@ public class PasswordService extends Service
                     for (String activePackage : activePackages) {
                         if(!activePackage.equals(lastActivity))
                         {
-                            lastActivity = activePackage;
-                            System.out.println("NOWA AKTYWNOSC! ==> " + lastActivity + " / " + blockedAppsPkgNames.size());
-                            if(blockedAppsPkgNames.contains(lastActivity))
+                            System.out.println("NOWA AKTYWNOSC! ==> " + activePackage + " / " + blockedAppsPkgNames.size());
+                            if(lastActivity!= null && !lastActivity.equals("konrad_wpam.drunkblock") && blockedAppsPkgNames.contains(activePackage))
                             {
                                 System.out.println("ZNALEZIONE DIALERY!!!!");
                                 helperIntent = new Intent("drunkblocker.PASSWORD_WINDOW_AC");
-                                //helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(helperIntent);
                             }
+                            lastActivity = activePackage;
                         }
                         else {
                             System.out.println(activePackage);
@@ -106,7 +127,7 @@ public class PasswordService extends Service
 
 
             }
-        }, 20000, 6000);  // every 6 seconds
+        }, 20000, 1000);  // every 1 seconds
       return START_STICKY;
     }
 
@@ -149,14 +170,6 @@ public class PasswordService extends Service
         return null;
     }
 
-    private void backToMainScreen()
-    {
-        Intent getToHomeScreen = new Intent(Intent.ACTION_MAIN);
-        getToHomeScreen.addCategory(Intent.CATEGORY_HOME);
-        getToHomeScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(getToHomeScreen);
-    }
-
     private List<String> queryAppPkgName(Intent appIntent)
     {
         List<String> appPkgNames = new ArrayList<>();
@@ -189,7 +202,37 @@ public class PasswordService extends Service
             appsPkgNames.add(info.packageName);
         }
         return appsPkgNames;
+    }
 
+    private List<String> getSms()
+    {
+
+        List<String> appsPkgNames = new ArrayList<String>();
+        final PackageManager pm = getPackageManager();
+        List<PackageInfo> ai = null;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            ai = pm.getPackagesHoldingPermissions(new String[]{"android.permission.SEND_SMS"}, PackageManager.MATCH_SYSTEM_ONLY);
+            for (PackageInfo info : ai) {
+                appsPkgNames.add(info.packageName);
+            }
+        }
+        return appsPkgNames;
+    }
+
+    private List<String> getPhone()
+    {
+        List<String> appsPkgNames = new ArrayList<String>();
+        final PackageManager pm = getPackageManager();
+        List<PackageInfo> ai = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            ai = pm.getPackagesHoldingPermissions(new String[]{"android.permission.CALL_PHONE"}, PackageManager.GET_META_DATA);
+        }
+        for (PackageInfo info : ai)
+        {
+            appsPkgNames.add(info.packageName);
+        }
+        return appsPkgNames;
     }
 }
 
