@@ -47,6 +47,11 @@ public class PasswordService extends Service
     public PasswordService() {
         super();
         appsToBeBlocked = new ArrayList<Intent>();
+        appsToBeBlocked.add(new Intent(Intent.ACTION_DIAL));
+        Intent temp = new Intent(Intent.ACTION_SEND);
+        temp.setType("text/plain");
+        temp.putExtra(Intent.EXTRA_TEXT,"content");
+        appsToBeBlocked.add(temp);
     }
 
     @Nullable
@@ -58,10 +63,10 @@ public class PasswordService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        final List<String> blockedAppsPkgNames = queryAppPkgName(appToBeFound);
+        final List<String> blockedAppsPkgNames = queryBlockedAppsPkgName(appsToBeBlocked);//queryAppPkgName(appToBeFound);
         appsInstalled = getInstalledAppsPkgNames();
 
-        smsIntent.setType("text/plain");
+       /* smsIntent.setType("text/plain");
         smsIntent.putExtra(Intent.EXTRA_TEXT,"content");
         sms = queryAppPkgName(smsIntent);
         sms2 = getSms();
@@ -85,7 +90,7 @@ public class PasswordService extends Service
         for (String app: appsInstalled)
         {
             System.out.println(app);
-        }
+        }*/
         Timer timer  =  new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
 

@@ -14,17 +14,29 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.Random;
 
-public class BlockedAppCallResolver extends FragmentActivity
+public class BlockedAppCallResolver extends android.app.Activity //FragmentActivity
 {
     private String passwordSet = "12345";
     private int[] passwordSignsOrder;
+    AlertDialog passwordWindow;
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         //createPasswordDialog();
-        AlertDialog passwordWindow = createPasswordWindow();
+        passwordWindow = createPasswordWindow();
         passwordWindow.show();
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        if(passwordWindow != null)
+            {
+                passwordWindow.dismiss();
+                passwordWindow = null;
+            }
     }
 
     /*public void createPasswordDialog()
@@ -79,7 +91,7 @@ public class BlockedAppCallResolver extends FragmentActivity
                 if(!checkPassword(passwordField.getText().toString(),passwordSet,passwordSignsOrder)) actionIfPasswordFailed();
                 else
                 {
-                    ad.dismiss();
+                    //ad.dismiss();
                     finish();
                 }
             }
