@@ -39,29 +39,6 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
             }
     }
 
-    /*public void createPasswordDialog()
-    {
-        DialogFragment pd = new PasswordDialog();
-        pd.show(getSupportFragmentManager(), "PasswordDialog");
-    }
-
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        if(!checkPassword()) actionIfPasswordFailed();
-        else
-        {
-            dialog.dismiss();
-            finish();
-        }
-    }
-
-    @Override
-    public void onDialogNegativeClick(DialogFragment dialog) {
-        actionIfPasswordFailed();
-    }
-*/
-
-
     private AlertDialog createPasswordWindow()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(BlockedAppCallResolver.this);
@@ -80,8 +57,8 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
         });
         passwordSignsOrder = samplingWithoutReplacement(passwordSet.length());
        // setContentView(mView);
-       // TextView title = (TextView) mView.findViewById(R.id.pw_title);
-       // title.setText(passwordSignsOrder.toString());
+        TextView title = (TextView) mView.findViewById(R.id.pw_title);
+        title.setText(R.string.signs_order + Arrays.toString(passwordSignsOrder));
         builder.setView(mView);
         final AlertDialog ad = builder.create();
         ok.setOnClickListener(new View.OnClickListener()

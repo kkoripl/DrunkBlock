@@ -4,9 +4,9 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -14,8 +14,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,45 +31,25 @@ public class MainActivity extends AppCompatActivity {
     String msg = "Android : ";
     Button b1;
     int a = 0;
+    private ListView mListView;
     private static final String[] PERMISSIONS = new String[] {
             KILL_BACKGROUND_PROCESSES
     };
+    PermissionsChecker permsChecker = new PermissionsChecker(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final PackageManager pm = getPackageManager();
+        List<ApplicationInfo> ai = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        ArrayList<String> apps = new ArrayList<String>();
+        for (ApplicationInfo info : ai)
+        {
+            apps.add(info.packageName);
+        }
+        String[] appsList = apps.toArray(new String[0]);
         setContentView(R.layout.activity_main);
-       // PermissionRequestActivity.start(this, REQUEST_CODE, MUST_PERMISSIONS, "Potrzebne uprawnienia", "Serio potrzebne");
-        if(!checkPermission(PERMISSIONS))
-        {
-            showMessageOKCancel("Potrzebujemy uprawnien",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            requestPerms(PERMISSIONS,PERMISSION_REQUEST_CODE);
-                        }
-                    });
-        }
-        if(checkIfPackageUsageStatsPermAdded())
-        {
-            if(!checkPackageUsageStatsPermGrant())
-            {
-                showMessageOKCancel("Potrzebujemy nadania uprawnien do przegladania statystyk uzywalnosci aplikacji" +
-                                "\nby moc sprawdzac zalozone przez Ciebie blokady\n"
-                                +"przejdz do ustawien (OK) nadaj je, pozwalajac aplikacji dzialac.",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-                            }
-                        });
-            }
-            else Toast.makeText(this, "Permissions stats granted", Toast.LENGTH_LONG).show();
-        }
-
-
+        permsChecker.makeCheck();
     }
 
     @Override
@@ -94,12 +76,12 @@ public class MainActivity extends AppCompatActivity {
                     {
                         if(shouldShowRequestPermissionRationale(permission))
                         {
-                            showMessageOKCancel("Potrzebujemy wszystkich uprawnien",
+                            permsChecker.showMessageOKCancel("Potrzebujemy wszystkich uprawnien",
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which)
                                         {
-                                            requestPerms(PERMISSIONS,PERMISSION_REQUEST_CODE);
+                                            permsChecker.requestPerms(PERMISSIONS,PERMISSION_REQUEST_CODE);
                                         }
                                     });
                         }
@@ -118,7 +100,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             Intent i = new Intent(this, PasswordService.class);
             startService(i);*/
-           startService(new Intent(this, PasswordService.class));
+                Intent i = new Intent(this, AppsListTemp.class);
+                startActivity(i);
+
+           //startService(new Intent(this, PasswordService.class));
             a=1;
             Log.d(msg,"Serwis ruszyl!!!");
         }
@@ -214,5 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 .create()
                 .show();
     }
+
+
 
 }

@@ -29,6 +29,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".AppsListTemp"></activity>
         <receiver android:name=".UnlockScreenBroadcastReceiver">
         </receiver>
         <service android:name="PasswordService" />
