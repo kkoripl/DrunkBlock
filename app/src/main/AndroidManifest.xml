@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="konrad_wpam.drunkblock">
+    package="konrad_wpam.drunkblock"
+    >
 
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
@@ -30,6 +31,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".AppsListTemp"></activity>
+        <activity android:name=".Settings"></activity>
         <receiver android:name=".UnlockScreenBroadcastReceiver">
         </receiver>
         <service android:name="PasswordService" />

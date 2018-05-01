@@ -1,22 +1,52 @@
 package konrad_wpam.drunkblock;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataToSetBlock
 {
+    private static DataToSetBlock instance;
     private String password;
     private float blockHours;
-    private List<String> appsToBlockPkgNames;
+    private ArrayList<String> appsToBlockPkgNames = new ArrayList<String>();
+    private String friend_number;
+    private String host_number;
 
-    public DataToSetBlock()
+
+    private DataToSetBlock() {
+    }
+
+    public static DataToSetBlock getDataToBlockInstance()
     {
-        appsToBlockPkgNames = new ArrayList<String>();
+        if(instance == null) instance = new DataToSetBlock();
+        return instance;
+    }
+
+    public void nullSettingsData()
+    {
+        password = null;
+        blockHours = 0;
+        friend_number = null;
+        host_number = null;
     }
 
     public void addAppToBlockList(String appPackageName)
     {
         appsToBlockPkgNames.add(appPackageName);
+    }
+
+    public void setAppsToBlockPkgNames(ArrayList<String> appsToBlockPkgNames) {
+        if(appsToBlockPkgNames == null)
+        {
+            this.appsToBlockPkgNames.clear();
+        }
+        else this.appsToBlockPkgNames= appsToBlockPkgNames;
+    }
+
+    public void addAppsToBlockList(ArrayList<String> packageNames)
+    {
+        appsToBlockPkgNames.addAll(packageNames);
     }
 
     // GETTERS & SETTERS
@@ -40,7 +70,19 @@ public class DataToSetBlock
         return appsToBlockPkgNames;
     }
 
-    public void setAppsToBlockPkgNames(List<String> appsToBlockPkgNames) {
-        this.appsToBlockPkgNames = appsToBlockPkgNames;
+    public String getFriend_number() {
+        return friend_number;
+    }
+
+    public void setFriend_number(String friend_number) {
+        this.friend_number = friend_number;
+    }
+
+    public String getHost_number() {
+        return host_number;
+    }
+
+    public void setHost_number(String host_number) {
+        this.host_number = host_number;
     }
 }

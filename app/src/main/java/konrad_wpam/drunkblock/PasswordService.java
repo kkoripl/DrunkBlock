@@ -35,23 +35,14 @@ import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 public class PasswordService extends Service
 {
-    List<Intent> appsToBeBlocked;
-    List<String> appsInstalled;
-    List<String> sms, ph, sms2;
-    Intent helperIntent = new Intent();
-    Intent appToBeFound = new Intent(Intent.ACTION_DIAL);
-    Intent smsIntent = new Intent(Intent.ACTION_SEND);
-    int timeForTopActivity = 1000 * 10;
-    final Context context = this;
-    String lastActivity;
+    private DataToSetBlock dtsb;
+    private Intent helperIntent = new Intent();
+    private int timeForTopActivity = 1000 * 10;
+    private final Context context = this;
+    private String lastActivity;
     public PasswordService() {
         super();
-        appsToBeBlocked = new ArrayList<Intent>();
-        appsToBeBlocked.add(new Intent(Intent.ACTION_DIAL));
-        Intent temp = new Intent(Intent.ACTION_SEND);
-        temp.setType("text/plain");
-        temp.putExtra(Intent.EXTRA_TEXT,"content");
-        appsToBeBlocked.add(temp);
+        dtsb = DataToSetBlock.getDataToBlockInstance();
     }
 
     @Nullable
@@ -63,34 +54,7 @@ public class PasswordService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        final List<String> blockedAppsPkgNames = queryBlockedAppsPkgName(appsToBeBlocked);//queryAppPkgName(appToBeFound);
-        appsInstalled = getInstalledAppsPkgNames();
-
-       /* smsIntent.setType("text/plain");
-        smsIntent.putExtra(Intent.EXTRA_TEXT,"content");
-        sms = queryAppPkgName(smsIntent);
-        sms2 = getSms();
-        ph = getPhone();
-        System.out.println("SMS!!!!");
-        for (String app: sms)
-        {
-            System.out.println(app);
-        }
-        System.out.println("SMS2!!!!");
-        for (String app: sms2)
-        {
-            System.out.println(app);
-        }
-        System.out.println("PHONE!!!!");
-        for (String app: ph)
-        {
-            System.out.println(app);
-        }
-        System.out.println("ZAINSTALOWANE APKI!!!!");
-        for (String app: appsInstalled)
-        {
-            System.out.println(app);
-        }*/
+       System.out.println("Password service ruszyl!");
         Timer timer  =  new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -110,8 +74,10 @@ public class PasswordService extends Service
                     for (String activePackage : activePackages) {
                         if(!activePackage.equals(lastActivity))
                         {
-                            System.out.println("NOWA AKTYWNOSC! ==> " + activePackage + " / " + blockedAppsPkgNames.size());
-                            if(lastActivity!= null && !lastActivity.equals("konrad_wpam.drunkblock") && blockedAppsPkgNames.contains(activePackage))
+                           // System.out.println("NOWA AKTYWNOSC! ==> " + activePackage + " / " + blockedAppsPkgNames.size());
+                            System.out.println("NOWA AKTYWNOSC! ==> " + activePackage);
+                            //if(lastActivity!= null && !lastActivity.equals("konrad_wpam.drunkblock") && blockedAppsPkgNames.contains(activePackage))
+                            if(lastActivity!= null && !lastActivity.equals("konrad_wpam.drunkblock") && dtsb.getAppsToBlockPkgNames().contains(activePackage))
                             {
                                 System.out.println("ZNALEZIONE DIALERY!!!!");
                                 helperIntent = new Intent("drunkblocker.PASSWORD_WINDOW_AC");

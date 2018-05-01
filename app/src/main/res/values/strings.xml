@@ -10,4 +10,20 @@
     <string name="locked">locked</string>
     <string name="unlocked"></string>
     <string name="to_lock_settings">To lock settings</string>
+    <string name="blocks_duration">Blocks duration</string>
+    <string name="set_password">Set password</string>
+    <string name="password_on_off">Password off/on</string>
+    <string name="friend_number">Friends number you can call even with block set</string>
+    <string name="host_number">Host number you can call even with block set</string>
+    <string name="start_blocking">Block!</string>
+
+    <string-array name="hours_spinner_items">
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>24 hours</item>
+    </string-array>
 </resources>

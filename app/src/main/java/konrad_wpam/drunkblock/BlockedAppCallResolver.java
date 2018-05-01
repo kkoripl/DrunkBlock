@@ -23,7 +23,6 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //createPasswordDialog();
         passwordWindow = createPasswordWindow();
         passwordWindow.show();
     }
@@ -56,7 +55,6 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
             }
         });
         passwordSignsOrder = samplingWithoutReplacement(passwordSet.length());
-       // setContentView(mView);
         TextView title = (TextView) mView.findViewById(R.id.pw_title);
         title.setText(R.string.signs_order + Arrays.toString(passwordSignsOrder));
         builder.setView(mView);
@@ -68,7 +66,6 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
                 if(!checkPassword(passwordField.getText().toString(),passwordSet,passwordSignsOrder)) actionIfPasswordFailed();
                 else
                 {
-                    //ad.dismiss();
                     finish();
                 }
             }
