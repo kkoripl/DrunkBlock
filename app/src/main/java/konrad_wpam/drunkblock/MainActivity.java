@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -21,33 +22,34 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static android.Manifest.permission.CALL_PHONE;
 import static android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int PERMISSION_REQUEST_CODE = 200;
-    String msg = "Android : ";
-    Button b1;
-    int a = 0;
+    private static Context thisContext;
+    private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
+    private static final int PERMISSION_REQUEST_CODE = 200;
+    private String msg = "Android : ";
     private ListView mListView;
     private static final String[] PERMISSIONS = new String[] {
-            KILL_BACKGROUND_PROCESSES
+            KILL_BACKGROUND_PROCESSES,
+            CALL_PHONE
     };
-    PermissionsChecker permsChecker = new PermissionsChecker(this);
+    private PermissionsChecker permsChecker = new PermissionsChecker(this);
+    private Button ChooseApps_StopService;
+
+    public static Context getContext()
+    {
+        return thisContext;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        thisContext = this;
         super.onCreate(savedInstanceState);
-        final PackageManager pm = getPackageManager();
-        List<ApplicationInfo> ai = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        ArrayList<String> apps = new ArrayList<String>();
-        for (ApplicationInfo info : ai)
-        {
-            apps.add(info.packageName);
-        }
-        String[] appsList = apps.toArray(new String[0]);
         setContentView(R.layout.activity_main);
         permsChecker.makeCheck();
     }
@@ -95,17 +97,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(a==0) {
-           /* Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-            startActivity(intent);
-            Intent i = new Intent(this, PasswordService.class);
-            startService(i);*/
-                Intent i = new Intent(this, AppsListTemp.class);
-                startActivity(i);
+        ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
+        if(!dtsb.isBlockSet())
+        {
+            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(thisContext, AppsListTemp.class));
+                }
+            });
 
-           //startService(new Intent(this, PasswordService.class));
-            a=1;
-            Log.d(msg,"Serwis ruszyl!!!");
+        }
+        else
+        {
+            ChooseApps_StopService.setText(R.string.stop_locking_apps);
+            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent helperIntent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
+                    helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    helperIntent.putExtra(String.valueOf(R.string.when_password_window),BlockedAppCallResolver.STOP_LOCKING);
+                    startActivity(helperIntent);
+                }
+            });
         }
         Log.d(msg,"ON Start");
     }
@@ -113,6 +127,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
+        ChooseApps_StopService.invalidate();
+        if(!dtsb.isBlockSet())
+        {
+            ChooseApps_StopService.setText(R.string.choose_apps);
+            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(thisContext, AppsListTemp.class));
+                }
+            });
+        }
+        else
+        {
+            ChooseApps_StopService.setText(R.string.stop_locking_apps);
+            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent helperIntent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
+                    helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    helperIntent.putExtra(String.valueOf(R.string.when_password_window),BlockedAppCallResolver.STOP_LOCKING);
+                    startActivity(helperIntent);
+                }
+            });
+
+        }
         Log.d(msg,"ON RESUME");
     }
 
@@ -125,8 +165,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        //Intent passwordIntent = new Intent(this,PasswordService.class);
-        //this.startService(passwordIntent);
         Log.d(msg,"ON Stop");
     }
 
@@ -148,57 +186,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void requestPerms(String[] permissions, int permission_request_code)
-    {
-        ActivityCompat.requestPermissions(this, permissions, permission_request_code);
-    }
-
-    private boolean checkPackageUsageStatsPermGrant()
-    {
-        boolean granted = false;
-        AppOpsManager appOps = (AppOpsManager) this.getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), this.getPackageName());
-        if (mode == AppOpsManager.MODE_DEFAULT) {
-            granted = (this.checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED);
-        } else {
-            granted = (mode == AppOpsManager.MODE_ALLOWED);
-        }
-        return granted;
-    }
-
-    private boolean checkIfPackageUsageStatsPermAdded()
-    {
-        boolean result = false;
-        try
-        {
-           PackageManager pm = getPackageManager();
-           PackageInfo pi = pm.getPackageInfo(getPackageName(), PackageManager.GET_PERMISSIONS);
-           String[] requestedPermissions = null;
-           if( pi != null)
-           {
-               requestedPermissions = pi.requestedPermissions;
-           }
-           if( requestedPermissions != null && requestedPermissions.length > 0)
-           {
-               List<String> requestedPermsList = Arrays.asList(requestedPermissions);
-               result = requestedPermsList.contains(PACKAGE_USAGE_STATS);
-           }
-           return result;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-    }
-
-    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(MainActivity.this)
-                .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
-                .create()
-                .show();
-    }
 
 
 

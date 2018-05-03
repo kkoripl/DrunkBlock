@@ -1,21 +1,56 @@
 <resources>
     <string name="app_name">DrunkBlock</string>
+
     <string name="ok_button">OK</string>
     <string name="cancel_button">Cancel</string>
-    <string name="fill_in_password">Fill password</string>
-    <string name="must_implement">must implement</string>
-    <string name="signs_order">Passwords signs order: </string>
+
+
     <string name="app_thumbnail">app_thumbnail</string>
     <string name="locker_thumbnail">locker_thumbnail</string>
+    <string name="must_implement">must implement</string>
     <string name="locked">locked</string>
     <string name="unlocked"></string>
+
+    <string name="fill_in_password">Fill password</string>
+    <string name="signs_order">Passwords signs order: </string>
+
     <string name="to_lock_settings">To lock settings</string>
+    <string name="start_blocking">Block!</string>
+    <string name="choose_apps">Choose apps</string>
+    <string name="stop_locking_apps">Stop Locking Apps</string>
+
     <string name="blocks_duration">Blocks duration</string>
     <string name="set_password">Set password</string>
     <string name="password_on_off">Password off/on</string>
     <string name="friend_number">Friends number you can call even with block set</string>
     <string name="host_number">Host number you can call even with block set</string>
-    <string name="start_blocking">Block!</string>
+    <string name="block_set">Block set till: </string>
+    <string name="db_running">Drunk Block Locks Your Apps</string>
+    <string name="click_to_launch">Click to launch Drunk Block app</string>
+
+    <string name="call_friend">Call friend</string>
+    <string name="call_host">Call party host</string>
+
+    <string name="blocking_apps_stopped">Blocking apps was stopped!</string>
+    <string name="when_password_window">when</string>
+
+    <string name="notf_channel_name">Drunk_Block_Notf</string>
+    <string name="notf_chan_desc">Notifications of Drunk Block App</string>
+    <string name="friend">friend</string>
+    <string name="host">host</string>
+
+    <string name="instruction">Instruction</string>
+    <string name="first_instruction">1. Click green Choose Apps button.</string>
+    <string name="second_instruction">2. Select which apps or services that you would like to block.</string>
+    <string name="third_instruction">3. Click green To lock settings button.</string>
+    <string name="fourth_instruction">4. Set how long you would like the apps to be blocked for.</string>
+    <string name="fifth_instruction">5. Ask yourself, "Do I want the ability to unlock these apps while timer is still running?
+        If YES activate password and set it. </string>
+    <string name="sixth_instruction">6. If you want fill in number to a friend or/and party host
+        that you would like to call during block.</string>
+    <string name="seventh_instruction">7. Click green Set Block button!</string>
+
+    <string name="date_format">hh:mm dd/MM/yyyy</string>
 
     <string-array name="hours_spinner_items">
         <item>10 minutes</item>
@@ -25,5 +60,14 @@
         <item>6 hours</item>
         <item>12 hours</item>
         <item>24 hours</item>
+    </string-array>
+    <string-array name="hours_spinner_data">
+        <item>60000</item>
+        <item>1800000</item>
+        <item>3600000</item>
+        <item>18000000</item>
+        <item>36000000</item>
+        <item>72000000</item>
+        <item>144000000</item>
     </string-array>
 </resources>
