@@ -11,7 +11,9 @@
     <string name="locked">locked</string>
     <string name="unlocked"></string>
 
-    <string name="fill_in_password">Fill password</string>
+    <string name="choose_apps_to_block">Choose apps to be blocked before going further.</string>
+
+    <string name="fill_in_password">Fill in password</string>
     <string name="signs_order">Passwords signs order: </string>
 
     <string name="to_lock_settings">To lock settings</string>
@@ -25,11 +27,11 @@
     <string name="friend_number">Friends number you can call even with block set</string>
     <string name="host_number">Host number you can call even with block set</string>
     <string name="block_set">Block set till: </string>
-    <string name="db_running">Drunk Block Locks Your Apps</string>
+    <string name="db_running">Drunk Block locks your apps till:</string>
     <string name="click_to_launch">Click to launch Drunk Block app</string>
 
-    <string name="call_friend">Call friend</string>
-    <string name="call_host">Call party host</string>
+    <string name="call_friend">Click to call friend</string>
+    <string name="call_host">Click to call party host</string>
 
     <string name="blocking_apps_stopped">Blocking apps was stopped!</string>
     <string name="when_password_window">when</string>
@@ -62,7 +64,7 @@
         <item>24 hours</item>
     </string-array>
     <string-array name="hours_spinner_data">
-        <item>60000</item>
+        <item>600000</item>
         <item>1800000</item>
         <item>3600000</item>
         <item>18000000</item>

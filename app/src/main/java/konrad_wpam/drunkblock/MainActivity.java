@@ -1,30 +1,21 @@
 package konrad_wpam.drunkblock;
 
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static android.Manifest.permission.CALL_PHONE;
 import static android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
-import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+import static android.Manifest.permission.PROCESS_OUTGOING_CALLS;
+import static android.Manifest.permission.READ_PHONE_STATE;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -33,10 +24,12 @@ public class MainActivity extends AppCompatActivity {
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
     private static final int PERMISSION_REQUEST_CODE = 200;
     private String msg = "Android : ";
-    private ListView mListView;
+    private Intent stopLockIntent;
     private static final String[] PERMISSIONS = new String[] {
             KILL_BACKGROUND_PROCESSES,
-            CALL_PHONE
+            CALL_PHONE,
+            READ_PHONE_STATE,
+            PROCESS_OUTGOING_CALLS
     };
     private PermissionsChecker permsChecker = new PermissionsChecker(this);
     private Button ChooseApps_StopService;
@@ -51,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         thisContext = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (stopLockIntent == null) stopLockIntent = createStopLockIntent(stopLockIntent);
         permsChecker.makeCheck();
     }
 
@@ -114,10 +108,7 @@ public class MainActivity extends AppCompatActivity {
             ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent helperIntent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
-                    helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    helperIntent.putExtra(String.valueOf(R.string.when_password_window),BlockedAppCallResolver.STOP_LOCKING);
-                    startActivity(helperIntent);
+                    startActivity(stopLockIntent);
                 }
             });
         }
@@ -145,10 +136,7 @@ public class MainActivity extends AppCompatActivity {
             ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent helperIntent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
-                    helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    helperIntent.putExtra(String.valueOf(R.string.when_password_window),BlockedAppCallResolver.STOP_LOCKING);
-                    startActivity(helperIntent);
+                    startActivity(stopLockIntent);
                 }
             });
 
@@ -184,6 +172,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    private Intent createStopLockIntent(Intent intent)
+    {
+        intent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(String.valueOf(R.string.when_password_window),BlockedAppCallResolver.STOP_LOCKING);
+        return intent;
     }
 
 

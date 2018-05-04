@@ -1,6 +1,7 @@
 package konrad_wpam.drunkblock;
 
 import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -9,6 +10,10 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
+import android.telecom.TelecomManager;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.widget.Toast;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,6 +23,9 @@ import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+ 	import android.telecom.Call;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by Konrad on 2018-03-23.
@@ -25,6 +33,9 @@ import java.util.TreeMap;
 
 public class PasswordService extends Service
 {
+    private String dialer = "com.android.dialer";
+    private TelephonyManager telephony = (TelephonyManager) MainActivity.getContext().getSystemService(Context.TELEPHONY_SERVICE);
+    private CallsReceiver cr;
     private DataToSetBlock dtsb;
     private Intent helperIntent = new Intent();
     private int timeForTopActivity = 1000 * 10; // 10 sekund
@@ -45,7 +56,12 @@ public class PasswordService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-       System.out.println("Password service ruszyl!");
+        //dtsb.setCallsReceiver(new CallsReceiver());
+        if(dtsb.getDialerToBeBlocked()) {
+            cr = new CallsReceiver();
+            telephony.listen(cr, PhoneStateListener.LISTEN_CALL_STATE);
+        }
+        System.out.println("Password service ruszyl!");
         timer  =  new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -62,18 +78,65 @@ public class PasswordService extends Service
 
                 if(activePackages != null) {
                     System.out.println("AKTYWNE PAKIETY!!!!");
+                   // System.out.println("przed1111!!!!" + " // " + cr.getPrev_state());
                     for (String activePackage : activePackages) {
                         if(!activePackage.equals(lastActivity))
                         {
                            // System.out.println("NOWA AKTYWNOSC! ==> " + activePackage + " / " + blockedAppsPkgNames.size());
                             System.out.println("NOWA AKTYWNOSC! ==> " + activePackage);
                             //if(lastActivity!= null && !lastActivity.equals("konrad_wpam.drunkblock") && blockedAppsPkgNames.contains(activePackage))
+                            /*if(activePackage.equals(dialer) && !lastActivity.equals("konrad_wpam.drunkblock"))
+                            {
+                                System.out.println(" in dialer! ==> true");
+                                cr.setInDialer(true);
+                                if(telephony.getCallState() == TelephonyManager.CALL_STATE_IDLE && cr.getPrev_state() == -1)
+                                {
+                                    System.out.println("ZNALEZIONE DIALERY xxxxxxxx!!!!");
+                                    helperIntent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
+                                    helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    helperIntent.putExtra(getString(R.string.when_password_window), BlockedAppCallResolver.TRY_TO_UNLOCK_APP);
+                                    startActivity(helperIntent);
+                                }
+                            }
+                            else if(!activePackage.equals("konrad_wpam.drunkblock"))
+                            {
+                                System.out.println(" in dialer! ==> false");
+                                cr.setInDialer(false);
+                                cr.setPrev_state(-1);
+                            }*/
                             if(lastActivity!= null && !lastActivity.equals("konrad_wpam.drunkblock") && dtsb.getAppsToBlockPkgNames().contains(activePackage))
                             {
+                                /*if(activePackage.equals(dialer)) {
+                                    if (telephony.getCallState() == TelephonyManager.CALL_STATE_IDLE) {
+                                        try {
+                                            Thread.sleep(100);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        if (telephony.getCallState() == TelephonyManager.CALL_STATE_IDLE) {
+                                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                                                if (!getActivePackagesBeforeLolli()[0].equals(dialer) || telephony.getCallState() != TelephonyManager.CALL_STATE_IDLE) break;
+                                            } else {
+                                                if (!getActivePackagesAfterLolli()[0].equals(dialer) || telephony.getCallState() != TelephonyManager.CALL_STATE_IDLE) break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+
+                                }*/
+
                                 System.out.println("ZNALEZIONE DIALERY!!!!");
                                 helperIntent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
                                 helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                helperIntent.putExtra(getString(R.string.when_password_window),BlockedAppCallResolver.TRY_TO_UNLOCK_APP);
+                                helperIntent.putExtra(getString(R.string.when_password_window), BlockedAppCallResolver.TRY_TO_UNLOCK_APP);
                                 startActivity(helperIntent);
                             }
                             lastActivity = activePackage;
@@ -90,7 +153,7 @@ public class PasswordService extends Service
 
 
             }
-        }, 100, 400);  // sprawdzam co 0.4 sekundy
+        }, 100, 300);  // sprawdzam co 0.4 sekundy
       return START_STICKY;
     }
 
@@ -98,6 +161,12 @@ public class PasswordService extends Service
     public void onDestroy()
     {
         timer.cancel();
+        if(cr!=null) {
+            telephony.listen(cr, PhoneStateListener.LISTEN_NONE);
+            cr = null;
+        }
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainActivity.getContext());
+        notificationManager.cancelAll();
         Toast.makeText(this,R.string.blocking_apps_stopped,Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }

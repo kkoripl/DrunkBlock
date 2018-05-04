@@ -29,20 +29,20 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
         Intent intent = getIntent();
         whenWantWindow = intent.getIntExtra(String.valueOf(R.string.when_password_window),TRY_TO_UNLOCK_APP);
         super.onCreate(savedInstanceState);
-        if(whenWantWindow == TRY_TO_UNLOCK_APP) {
+        if (whenWantWindow == TRY_TO_UNLOCK_APP) {
             if (!dtsb.getPassword().equals("")) {
+                System.out.println("NAPIERDALAM BLOKADE!!!");
                 passwordWindow = createPasswordWindow(whenWantWindow);
                 passwordWindow.show();
             } else {
                 actionIfPasswordFailedToUnlock();
                 finish();
             }
-        }
-        else
-        {
+        } else {
             passwordWindow = createPasswordWindow(whenWantWindow);
             passwordWindow.show();
         }
+
     }
 
     @Override
@@ -74,7 +74,7 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
         });
         passwordSignsOrder = samplingWithoutReplacement(dtsb.getPassword().length());
         TextView title = (TextView) mView.findViewById(R.id.pw_title);
-        title.setText(getString(R.string.signs_order) + Arrays.toString(passwordSignsOrder));
+        title.setText(getString(R.string.signs_order) + " " + Arrays.toString(passwordSignsOrder));
         builder.setView(mView);
         final AlertDialog ad = builder.create();
 

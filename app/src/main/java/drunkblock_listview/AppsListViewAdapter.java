@@ -47,21 +47,13 @@ public class AppsListViewAdapter extends BaseAdapter
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = new ViewHolder();
         AppData appData = (AppData) getItem(position);
-        if(convertView == null)
-        {
-            convertView = mInflater.inflate(R.layout.app_on_list_view, parent, false);
-            holder.appName = (TextView) convertView.findViewById(R.id.app_name);
-            holder.ifAppLocked = (TextView) convertView.findViewById(R.id.locked_unlocked_text);
-            holder.appThumbnail = (ImageView) convertView.findViewById(R.id.app_thumbnail);
-            holder.padlock = (ImageView) convertView.findViewById(R.id.locker_thumbnail);
-            holder.appName.setText(appData.getAppLabel());
-            holder.appThumbnail.setImageDrawable(appData.getIcon());
-            convertView.setTag(holder);
-        }
-        else
-        {
-            holder = (ViewHolder) convertView.getTag();
-        }
+        convertView = mInflater.inflate(R.layout.app_on_list_view, parent, false);
+        holder.appName = (TextView) convertView.findViewById(R.id.app_name);
+        holder.ifAppLocked = (TextView) convertView.findViewById(R.id.locked_unlocked_text);
+        holder.appThumbnail = (ImageView) convertView.findViewById(R.id.app_thumbnail);
+        holder.padlock = (ImageView) convertView.findViewById(R.id.locker_thumbnail);
+        holder.appName.setText(appData.getAppLabel());
+        holder.appThumbnail.setImageDrawable(appData.getIcon());
         if(appData.getIfLocked())
         {
             holder.ifAppLocked.setText(R.string.locked);
@@ -72,6 +64,7 @@ public class AppsListViewAdapter extends BaseAdapter
             holder.ifAppLocked.setText(R.string.unlocked);
             holder.padlock.setImageResource(R.drawable.unlocked_locker);
         }
+        convertView.setTag(holder);
         return convertView;
     }
 

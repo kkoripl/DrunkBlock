@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
 
     <application
         android:allowBackup="true"
@@ -33,8 +35,6 @@
         </activity>
         <activity android:name=".AppsListTemp"></activity>
         <activity android:name=".Settings"></activity>
-        <receiver android:name=".UnlockScreenBroadcastReceiver">
-        </receiver>
         <service android:name="PasswordService" />
         <service android:name=".BlockTimeChecker" />
 

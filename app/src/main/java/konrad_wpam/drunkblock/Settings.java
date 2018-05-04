@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -31,7 +33,6 @@ public class Settings extends Activity
     private Switch pass_off_on;
     private EditText password, host_number, friend_number;
     private boolean isNotfChannelSet = false;
-    private String dateFormat = "hh:mm dd/MM/yyyy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,19 +96,20 @@ public class Settings extends Activity
 
 
                 getBlockData(dtsb);
-                if((pass_off_on.isChecked() && !password.getText().toString().equals(null)) || !pass_off_on.isChecked())
+                if((pass_off_on.isChecked() && !password.getText().toString().equals("")) || !pass_off_on.isChecked())
                 {
                     dtsb.setPassword(password.getText().toString());
                     dtsb.setBlockSet(true);
                     dtsb.setPassServiceIntent(new Intent(thisContext, PasswordService.class));
                     dtsb.setTimeCheckIntent(new Intent(thisContext,BlockTimeChecker.class));
+
                     if(makeNotificationChannel(NOTIF_CHANNEL_ID))
                     {
-                        if(dtsb.getHost_number().length()!=0) makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.host));
-                        if(dtsb.getFriend_number().length()!=0) makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.friend));
+                        if(dtsb.getHost_number().length()!=0) makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.host),"");
+                        if(dtsb.getFriend_number().length()!=0) makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.friend),"");
+                        makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.db_running),dtsb.getBlockTill());
                     }
-                    makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.db_running));
-                    Toast.makeText(thisContext,getString(R.string.block_set) + dtsb.getBlockTill() ,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(thisContext,getString(R.string.block_set) + " " +dtsb.getBlockTill() ,Toast.LENGTH_SHORT).show();
                     startService(dtsb.getPassServiceIntent());
                     startService(dtsb.getTimeCheckIntent());
                     startActivity(new Intent(thisContext, MainActivity.class));
@@ -117,7 +119,7 @@ public class Settings extends Activity
         });
     }
 
-    private void makeNotifications(String channel_id, String which)
+    private void makeNotifications(String channel_id, String which,String blockTill)
     {
         Intent intent;
         NotificationCompat.Builder notifBuilder;
@@ -142,9 +144,9 @@ public class Settings extends Activity
                     .setSmallIcon(R.drawable.home_phone_small)
                     .setContentTitle(getString(R.string.call_host))
                     .setContentText(dtsb.getHost_number())
+                    .setShowWhen(false)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(createPendingIntent(intent))
-                    .setShowWhen(false)
                     .setOngoing(true);
             notificationManager.notify(HOST_NOTIF_ID, notifBuilder.build());
         }
@@ -153,7 +155,7 @@ public class Settings extends Activity
             intent = new Intent(thisContext,MainActivity.class);
             notifBuilder = new NotificationCompat.Builder(thisContext, channel_id)
                     .setSmallIcon(R.drawable.locked_locker)
-                    .setContentTitle(getString(R.string.db_running))
+                    .setContentTitle(getString(R.string.db_running) + " " + blockTill)
                     .setContentText(getString(R.string.click_to_launch))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(createPendingIntent(intent))

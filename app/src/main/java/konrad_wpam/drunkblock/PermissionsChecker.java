@@ -19,6 +19,8 @@ import java.util.List;
 import static android.Manifest.permission.CALL_PHONE;
 import static android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+import static android.Manifest.permission.PROCESS_OUTGOING_CALLS;
+import static android.Manifest.permission.READ_PHONE_STATE;
 
 public class PermissionsChecker implements PermissionsCheck{
 
@@ -29,7 +31,9 @@ public class PermissionsChecker implements PermissionsCheck{
     }
     private static final String[] PERMISSIONS = new String[] {
             KILL_BACKGROUND_PROCESSES,
-            CALL_PHONE
+            CALL_PHONE,
+            READ_PHONE_STATE,
+            PROCESS_OUTGOING_CALLS
     };
 
     public void makeCheck()
@@ -60,7 +64,7 @@ public class PermissionsChecker implements PermissionsCheck{
                             }
                         });
             }
-            else Toast.makeText(activity, "Permissions granted", Toast.LENGTH_LONG).show();
+            else Toast.makeText(activity, "Stats Permissions granted", Toast.LENGTH_LONG).show();
         }
     }
 

@@ -15,11 +15,11 @@ public class DataToSetBlock
     private ArrayList<String> appsToBlockPkgNames = new ArrayList<String>();
     private String friend_number;
     private String host_number;
+    private boolean dialerToBeBlocked = false;
     private boolean blockSet = false;
     private Intent passServiceIntent;
     private Intent timeCheckIntent;
-
-    private Thread checkingTimeBlock;
+    private CallsReceiver callsReceiver;
 
 
     private DataToSetBlock() {
@@ -57,13 +57,6 @@ public class DataToSetBlock
     }
 
     // GETTERS & SETTERS
-    public Thread getCheckingTimeBlock() {
-        return checkingTimeBlock;
-    }
-
-    public void setCheckingTimeBlock(Thread checkingTimeBlock) {
-        this.checkingTimeBlock = checkingTimeBlock;
-    }
 
     public String getPassword() {
         return password;
@@ -124,5 +117,21 @@ public class DataToSetBlock
 
     public void setTimeCheckIntent(Intent timeCheckIntent) {
         this.timeCheckIntent = timeCheckIntent;
+    }
+
+    public CallsReceiver getCallsReceiver() {
+        return callsReceiver;
+    }
+
+    public void setCallsReceiver(CallsReceiver callsReceiver) {
+        this.callsReceiver = callsReceiver;
+    }
+
+    public boolean getDialerToBeBlocked() {
+        return dialerToBeBlocked;
+    }
+
+    public void setDialerToBeBlocked(boolean dialerToBeBlocked) {
+        this.dialerToBeBlocked = dialerToBeBlocked;
     }
 }

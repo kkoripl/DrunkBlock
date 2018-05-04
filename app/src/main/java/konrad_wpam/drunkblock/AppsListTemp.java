@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.reflect.Array;
@@ -20,9 +22,11 @@ import drunkblock_listview.AppsListViewAdapter;
 
 public class AppsListTemp extends Activity
 {
+    private String dialer = "com.android.dialer";
     private Context thisContext = this;
     private ListView mListView;
     private ArrayList<AppData> apps;
+    private AppsListViewAdapter adapter;
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
 
     @Override
@@ -32,20 +36,33 @@ public class AppsListTemp extends Activity
 
         mListView = (ListView) findViewById(R.id.apps_list);
         apps = loadApps();
-        AppsListViewAdapter adapter = new AppsListViewAdapter(this, apps);
+
+        adapter = new AppsListViewAdapter(this, apps);
         mListView.setAdapter(adapter);
         addOnListViewClickListener(mListView);
         addToSettingsButtonClickListener((Button) findViewById(R.id.lv_to_settings),this);
     }
 
-    private void addOnListViewClickListener(ListView mListView)
+    private void addOnListViewClickListener(final ListView mListView)
     {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(apps.get(position).getIfLocked()) apps.get(position).setIfLocked(false);
-                    else apps.get(position).setIfLocked(true);
-                    parent.getAdapter().getView(position,view,parent);
+
+                ImageView padlock = (ImageView) view.findViewById(R.id.locker_thumbnail);
+                TextView ifAppLocked = (TextView) view.findViewById(R.id.locked_unlocked_text);
+                if(apps.get(position).getIfLocked())
+                {
+                    apps.get(position).setIfLocked(false);
+                    ifAppLocked.setText(R.string.unlocked);
+                    padlock.setImageResource(R.drawable.unlocked_locker);
+                }
+                else
+                {
+                    apps.get(position).setIfLocked(true);
+                    ifAppLocked.setText(R.string.locked);
+                    padlock.setImageResource(R.drawable.locked_locker);
+                }
             }
         });
     }
@@ -56,14 +73,15 @@ public class AppsListTemp extends Activity
             @Override
             public void onClick(View v) {
                 dtsb.setAppsToBlockPkgNames(null);
-                if(getAppsToBlock(apps).size()!=0)
+                ArrayList<String> appsBlocked = getAppsToBlock(apps);
+                if(appsBlocked.size()!=0 || dtsb.getDialerToBeBlocked())
                 {
-                    dtsb.addAppsToBlockList(getAppsToBlock(apps));
+                    dtsb.addAppsToBlockList(appsBlocked);
                     startActivity(new Intent(activity, Settings.class));
                 }
                 else
                 {
-                    Toast.makeText(thisContext,"Choose apps to be blocked before going further.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(thisContext,R.string.choose_apps_to_block,Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -93,13 +111,15 @@ public class AppsListTemp extends Activity
         ArrayList<String> appsToBlock = new ArrayList<String>();
         for (AppData app : apps)
         {
-            System.out.println(app.getAppPkgName() + " // " + app.getIfLocked());
             if(app.getIfLocked())
             {
-                appsToBlock.add(app.getAppPkgName());
+                if(app.getAppPkgName().equals(dialer))
+                {
+                    dtsb.setDialerToBeBlocked(true);
+                }
+                else appsToBlock.add(app.getAppPkgName());
             }
         }
-        System.out.println(appsToBlock.size());
         return appsToBlock;
     }
 
