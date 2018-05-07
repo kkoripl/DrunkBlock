@@ -40,7 +40,8 @@ public class CallsReceiver extends PhoneStateListener
                 case TelephonyManager.CALL_STATE_OFFHOOK:
                 {
                    if(!(prev_state == TelephonyManager.CALL_STATE_RINGING ||
-                           (prev_state== TelephonyManager.CALL_STATE_IDLE && incomingNumber.equals(dtsb.getFriend_number()))))
+                           (prev_state== TelephonyManager.CALL_STATE_IDLE &&
+                                   (incomingNumber.equals(dtsb.getFriend_number()) || incomingNumber.equals(dtsb.getHost_number())))))
                    {
                        killCall(MainActivity.getContext());
                    }

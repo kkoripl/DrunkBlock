@@ -11,7 +11,6 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,33 +37,58 @@ public class PermissionsChecker implements PermissionsCheck{
 
     public void makeCheck()
     {
+        boolean permissionsGiven1 = false;
+        boolean permissionsGiven2 = false;
         if(!checkPermissions(PERMISSIONS))
         {
-            showMessageOKCancel("Potrzebujemy uprawnien",
+            showMessageOKCancel(MainActivity.getContext().getString(R.string.other_please),
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which)
                         {
-                            requestPerms(PERMISSIONS,PERMISSION_REQUEST_CODE);
+                            requestPerms();
                         }
-                    });
+                    },
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            DataToSetBlock.getDataToBlockInstance().setPermissionsGiven1(false);
+                        }
+                    }
+            );
+        }
+        else
+        {
+            DataToSetBlock.getDataToBlockInstance().setPermissionsGiven1(true);
         }
         if(checkIfPackageUsageStatsPermAdded())
         {
             if(!checkPackageUsageStatsPermGrant())
             {
-                showMessageOKCancel("Potrzebujemy nadania uprawnien do przegladania statystyk uzywalnosci aplikacji" +
-                                "\nby moc sprawdzac zalozone przez Ciebie blokady\n"
-                                +"przejdz do ustawien (OK) nadaj je, pozwalajac aplikacji dzialac.",
+                showMessageOKCancel(MainActivity.getContext().getString(R.string.usage_stats_please),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
                                 activity.startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
                             }
+                        },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                DataToSetBlock.getDataToBlockInstance().setPermissionsGiven2(false);
+                                //activity.finish();
+                               // MainActivity.getContext().startActivity(new Intent (MainActivity.getContext(),MainActivity.class));
+                            }
                         });
             }
-            else Toast.makeText(activity, "Stats Permissions granted", Toast.LENGTH_LONG).show();
+            else
+            {
+                DataToSetBlock.getDataToBlockInstance().setPermissionsGiven2(true);
+            }
+            //else Toast.makeText(activity, "Stats Permissions granted", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -86,9 +110,9 @@ public class PermissionsChecker implements PermissionsCheck{
     }
 
     @Override
-    public void requestPerms(String[] permissions, int permission_request_code)
+    public void requestPerms()
     {
-        ActivityCompat.requestPermissions(activity, permissions, permission_request_code);
+        ActivityCompat.requestPermissions(activity, PERMISSIONS, MainActivity.PERMISSION_REQUEST_CODE);
     }
 
     @Override
@@ -105,12 +129,12 @@ public class PermissionsChecker implements PermissionsCheck{
     }
 
     @Override
-    public void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener)
+    public void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener, DialogInterface.OnClickListener cancelListener)
     {
         new AlertDialog.Builder(activity)
                 .setMessage(message)
                 .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel", cancelListener)
                 .create()
                 .show();
     }

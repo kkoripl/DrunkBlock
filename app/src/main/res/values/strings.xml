@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">DrunkBlock</string>
+    <string name="this_app_package">konrad_wpam.drunkblock</string>
+    <string name="password_window_act">drunkblocker.PASSWORD_WINDOW_AC</string>
+    <string name="dialer_pkg">com.android.dialer</string>
+    <string name="clock_pkg">com.android.deskclock</string>string>
 
     <string name="ok_button">OK</string>
     <string name="cancel_button">Cancel</string>
-
 
     <string name="app_thumbnail">app_thumbnail</string>
     <string name="locker_thumbnail">locker_thumbnail</string>
@@ -14,12 +17,15 @@
     <string name="choose_apps_to_block">Choose apps to be blocked before going further.</string>
 
     <string name="fill_in_password">Fill in password</string>
+    <string name="friendNo_not_correct">Friends number incorrect</string>
+    <string name="hostNo_not_correct">Hosts number incorrect</string>
     <string name="signs_order">Passwords signs order: </string>
 
     <string name="to_lock_settings">To lock settings</string>
     <string name="start_blocking">Block!</string>
     <string name="choose_apps">Choose apps</string>
     <string name="stop_locking_apps">Stop Locking Apps</string>
+    <string name="cant_stop_locking">You have chosen not to stop locking apps</string>
 
     <string name="blocks_duration">Blocks duration</string>
     <string name="set_password">Set password</string>
@@ -72,4 +78,11 @@
         <item>72000000</item>
         <item>144000000</item>
     </string-array>
+
+    <string name="usage_stats_please">We need your permission to check live usage of your apps for our blocks to work.
+        Please go to Settings and let us do our job.</string>
+    <string name="other_please">Your permission to use phone and kill processes in background is needed to set block on phone calls if you would like to.
+    Please give it to us and let us do our job.</string>
+    <string name="we_need_permissions"> App would not work without permissions.
+        Click to add them.</string>
 </resources>

@@ -10,8 +10,9 @@ import java.util.List;
 public class DataToSetBlock
 {
     private static DataToSetBlock instance;
-    private String password;
+    private String password="";
     private String blockTill;
+    private ArrayList<AppData> allApps = new ArrayList<AppData>();
     private ArrayList<String> appsToBlockPkgNames = new ArrayList<String>();
     private String friend_number;
     private String host_number;
@@ -19,7 +20,9 @@ public class DataToSetBlock
     private boolean blockSet = false;
     private Intent passServiceIntent;
     private Intent timeCheckIntent;
-    private CallsReceiver callsReceiver;
+    private boolean permissionsGiven1 = false;
+    private boolean permissionsGiven2 = false;
+  //  private CallsReceiver callsReceiver;
 
 
     private DataToSetBlock() {
@@ -119,13 +122,13 @@ public class DataToSetBlock
         this.timeCheckIntent = timeCheckIntent;
     }
 
-    public CallsReceiver getCallsReceiver() {
+  /*  public CallsReceiver getCallsReceiver() {
         return callsReceiver;
     }
 
     public void setCallsReceiver(CallsReceiver callsReceiver) {
         this.callsReceiver = callsReceiver;
-    }
+    }*/
 
     public boolean getDialerToBeBlocked() {
         return dialerToBeBlocked;
@@ -133,5 +136,29 @@ public class DataToSetBlock
 
     public void setDialerToBeBlocked(boolean dialerToBeBlocked) {
         this.dialerToBeBlocked = dialerToBeBlocked;
+    }
+
+    public ArrayList<AppData> getAllApps() {
+        return allApps;
+    }
+
+    public void setAllApps(ArrayList<AppData> allApps) {
+        this.allApps = allApps;
+    }
+
+    public boolean isPermissionsGiven1() {
+        return permissionsGiven1;
+    }
+
+    public void setPermissionsGiven1(boolean permissionsGiven) {
+        this.permissionsGiven1 = permissionsGiven;
+    }
+
+    public boolean isPermissionsGiven2() {
+        return permissionsGiven2;
+    }
+
+    public void setPermissionsGiven2(boolean permissionsGiven) {
+        this.permissionsGiven2 = permissionsGiven;
     }
 }

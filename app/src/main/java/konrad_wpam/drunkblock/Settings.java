@@ -26,6 +26,7 @@ public class Settings extends Activity
     private static String NOTIF_CHANNEL_ID = "db_notfs";
     private static int FRIEND_NOTF_ID = 500;
     private static int HOST_NOTIF_ID = 501;
+    private static int DB_NOTIF_ID = 502;
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
     private Context thisContext = this;
     private Button block_button;
@@ -33,6 +34,7 @@ public class Settings extends Activity
     private Switch pass_off_on;
     private EditText password, host_number, friend_number;
     private boolean isNotfChannelSet = false;
+    //private Validator validator
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,26 +95,32 @@ public class Settings extends Activity
         block_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 getBlockData(dtsb);
-                if((pass_off_on.isChecked() && !password.getText().toString().equals("")) || !pass_off_on.isChecked())
+                //if((pass_off_on.isChecked() && !password.getText().toString().equals("")) || !pass_off_on.isChecked())
+                if(Validator.validateSettingsPassword(pass_off_on.isChecked(),password.getText().toString()))
                 {
-                    dtsb.setPassword(password.getText().toString());
-                    dtsb.setBlockSet(true);
-                    dtsb.setPassServiceIntent(new Intent(thisContext, PasswordService.class));
-                    dtsb.setTimeCheckIntent(new Intent(thisContext,BlockTimeChecker.class));
+                    if(Validator.validatePhoneNumber(dtsb.getFriend_number())) {
+                        if(Validator.validatePhoneNumber(dtsb.getHost_number())) {
+                            dtsb.setPassword(password.getText().toString());
+                            dtsb.setBlockSet(true);
+                            dtsb.setPassServiceIntent(new Intent(thisContext, PasswordService.class));
+                            dtsb.setTimeCheckIntent(new Intent(thisContext, BlockTimeChecker.class));
 
-                    if(makeNotificationChannel(NOTIF_CHANNEL_ID))
-                    {
-                        if(dtsb.getHost_number().length()!=0) makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.host),"");
-                        if(dtsb.getFriend_number().length()!=0) makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.friend),"");
-                        makeNotifications(NOTIF_CHANNEL_ID,getString(R.string.db_running),dtsb.getBlockTill());
+                            if (makeNotificationChannel(NOTIF_CHANNEL_ID)) {
+                                if (dtsb.getHost_number().length() != 0)
+                                    makeNotifications(NOTIF_CHANNEL_ID, getString(R.string.host), "");
+                                if (dtsb.getFriend_number().length() != 0)
+                                    makeNotifications(NOTIF_CHANNEL_ID, getString(R.string.friend), "");
+                                makeNotifications(NOTIF_CHANNEL_ID, getString(R.string.db_running), dtsb.getBlockTill());
+                            }
+                            Toast.makeText(thisContext, getString(R.string.block_set) + " " + dtsb.getBlockTill(), Toast.LENGTH_SHORT).show();
+                            startService(dtsb.getPassServiceIntent());
+                            startService(dtsb.getTimeCheckIntent());
+                            startActivity(new Intent(thisContext, MainActivity.class));
+                        }
+                        else Toast.makeText(thisContext,R.string.hostNo_not_correct,Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(thisContext,getString(R.string.block_set) + " " +dtsb.getBlockTill() ,Toast.LENGTH_SHORT).show();
-                    startService(dtsb.getPassServiceIntent());
-                    startService(dtsb.getTimeCheckIntent());
-                    startActivity(new Intent(thisContext, MainActivity.class));
+                    else Toast.makeText(thisContext,R.string.friendNo_not_correct,Toast.LENGTH_SHORT).show();
                 }
                 else Toast.makeText(thisContext,R.string.fill_in_password,Toast.LENGTH_SHORT).show();
             }
@@ -160,7 +168,7 @@ public class Settings extends Activity
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(createPendingIntent(intent))
                     .setOngoing(true);
-            notificationManager.notify(HOST_NOTIF_ID, notifBuilder.build());
+            notificationManager.notify(DB_NOTIF_ID, notifBuilder.build());
         }
     }
 

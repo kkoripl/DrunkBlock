@@ -13,15 +13,15 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.Random;
 
-public class BlockedAppCallResolver extends android.app.Activity //FragmentActivity
+public class BlockedAppCallResolver extends android.app.Activity
 {
     public static int STOP_LOCKING = 1;
     public static int TRY_TO_UNLOCK_APP = 0;
-    public static String PASSWORD_WINDOW_ACT= "drunkblocker.PASSWORD_WINDOW_AC";
     private int whenWantWindow;
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
     private int[] passwordSignsOrder;
     private AlertDialog passwordWindow;
+    //private Validator validator = new Validator();
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -31,7 +31,6 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
         super.onCreate(savedInstanceState);
         if (whenWantWindow == TRY_TO_UNLOCK_APP) {
             if (!dtsb.getPassword().equals("")) {
-                System.out.println("NAPIERDALAM BLOKADE!!!");
                 passwordWindow = createPasswordWindow(whenWantWindow);
                 passwordWindow.show();
             } else {
@@ -82,7 +81,8 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (!checkPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
+                    //if (!checkPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
+                    if(Validator.validateFilledPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
                         actionIfPasswordFailedToUnlock();
                     else {
                         finish();
@@ -95,7 +95,8 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (checkPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
+                    //if (checkPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
+                    if(Validator.validateFilledPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
                     {
                         stopLocking();
 
@@ -107,12 +108,12 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
         return ad;
     }
 
-    private boolean checkPassword(String passwordInput, String passwordSet, int[] passwordSignsOrder)
+    /*private boolean checkPassword(String passwordInput, String passwordSet, int[] passwordSignsOrder)
     {
         if(passwordInput.length()==passwordSet.length())
         {
             for (int i = 0; i < passwordSet.length(); i++) {
-                System.out.println(i + " IN: " + passwordInput.charAt(i) + " || " + passwordSet.charAt(passwordSignsOrder[i] - 1));
+              //  System.out.println(i + " IN: " + passwordInput.charAt(i) + " || " + passwordSet.charAt(passwordSignsOrder[i] - 1));
                 if (passwordInput.charAt(i) != passwordSet.charAt(passwordSignsOrder[i] - 1)) {
                     return false;
                 }
@@ -120,7 +121,7 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
             return true;
         }
         return false;
-    }
+    }*/
 
     private int[] samplingWithoutReplacement(int passwordSize)
     {
@@ -138,7 +139,6 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
            passwordSignsOrder[i-1] = randomNumber+1;
            wasRand[randomNumber] = true;
        }
-       System.out.println("Przelosowalem: " + Arrays.toString(passwordSignsOrder));
        return passwordSignsOrder;
     }
 
@@ -155,7 +155,5 @@ public class BlockedAppCallResolver extends android.app.Activity //FragmentActiv
     {
         stopService(dtsb.getTimeCheckIntent());
         stopService(dtsb.getPassServiceIntent());
-       // stopService(new Intent(this, PasswordService.class));
-        dtsb.setBlockSet(false);
     }
 }

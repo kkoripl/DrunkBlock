@@ -22,17 +22,18 @@ public class MainActivity extends AppCompatActivity {
 
     private static Context thisContext;
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
-    private static final int PERMISSION_REQUEST_CODE = 200;
+    public static final int PERMISSION_REQUEST_CODE = 200;
     private String msg = "Android : ";
     private Intent stopLockIntent;
-    private static final String[] PERMISSIONS = new String[] {
+   /* private static final String[] PERMISSIONS = new String[] {
             KILL_BACKGROUND_PROCESSES,
             CALL_PHONE,
             READ_PHONE_STATE,
             PROCESS_OUTGOING_CALLS
-    };
+    };*/
     private PermissionsChecker permsChecker = new PermissionsChecker(this);
     private Button ChooseApps_StopService;
+    private boolean permsChecked = false;
 
     public static Context getContext()
     {
@@ -45,12 +46,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (stopLockIntent == null) stopLockIntent = createStopLockIntent(stopLockIntent);
-        permsChecker.makeCheck();
+        if(!permsChecked)
+        {
+            permsChecker.makeCheck();
+            permsChecked = true;
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
+        permsChecked = true;
         boolean ifGranted = true;
         if(requestCode == PERMISSION_REQUEST_CODE)
         {
@@ -64,25 +70,27 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                if(ifGranted) Toast.makeText(this, "Permissions granted", Toast.LENGTH_LONG).show();
+                if(ifGranted)
+                {
+                    whichButtonToCreate();
+                   /* if(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2())
+                    {
+                        if (!dtsb.isBlockSet()) {
+                            makeChooseAppsButton();
+                        } else {
+                            if(!dtsb.getPassword().equals("")) {
+                                makeStopLockingButton();
+                            }
+                            else
+                            {
+                                makeCantStopButton();
+                            }
+                        }
+                    }*/
+                }
                 else
                 {
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
-                    for( String permission : permissions)
-                    {
-                        if(shouldShowRequestPermissionRationale(permission))
-                        {
-                            permsChecker.showMessageOKCancel("Potrzebujemy wszystkich uprawnien",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which)
-                                        {
-                                            permsChecker.requestPerms(PERMISSIONS,PERMISSION_REQUEST_CODE);
-                                        }
-                                    });
-                        }
-                    }
-
+                    makePermissionsNeededButton();
                 }
             }
         }
@@ -91,68 +99,74 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
-        if(!dtsb.isBlockSet())
+        if(!permsChecked)
         {
-            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(thisContext, AppsListTemp.class));
-                }
-            });
-
+            permsChecker.makeCheck();
+            permsChecked = true;
         }
-        else
-        {
-            ChooseApps_StopService.setText(R.string.stop_locking_apps);
-            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(stopLockIntent);
+        whichButtonToCreate();
+        /*ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
+        ChooseApps_StopService.invalidate();
+            if(!(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2()))
+            {
+                makePermissionsNeededButton();
+            }
+            else if (!dtsb.isBlockSet()) {
+                makeChooseAppsButton();
+            } else {
+                if(!dtsb.getPassword().equals("")) {
+                    makeStopLockingButton();
                 }
-            });
-        }
+                else
+                {
+                    makeCantStopButton();
+                }
+            }*/
         Log.d(msg,"ON Start");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
-        ChooseApps_StopService.invalidate();
-        if(!dtsb.isBlockSet())
+        if(!permsChecked)
         {
-            ChooseApps_StopService.setText(R.string.choose_apps);
-            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(thisContext, AppsListTemp.class));
-                }
-            });
+            permsChecker.makeCheck();
+            permsChecked = true;
         }
-        else
-        {
-            ChooseApps_StopService.setText(R.string.stop_locking_apps);
-            ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(stopLockIntent);
-                }
-            });
 
+        whichButtonToCreate();
+       /* ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
+        ChooseApps_StopService.invalidate();
+        if(!(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2()))
+        {
+           makePermissionsNeededButton();
         }
+        else if (!dtsb.isBlockSet())
+            {
+                makeChooseAppsButton();
+            } else {
+                if(!dtsb.getPassword().equals("")) {
+                    makeStopLockingButton();
+                }
+                else
+                {
+                    makeCantStopButton();
+                }
+            }*/
         Log.d(msg,"ON RESUME");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        permsChecked = false;
         Log.d(msg,"ON Pause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        permsChecked = false;
         Log.d(msg,"ON Stop");
     }
 
@@ -176,13 +190,76 @@ public class MainActivity extends AppCompatActivity {
 
     private Intent createStopLockIntent(Intent intent)
     {
-        intent = new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
+        intent = new Intent(getString(R.string.password_window_act)); //new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(String.valueOf(R.string.when_password_window),BlockedAppCallResolver.STOP_LOCKING);
         return intent;
     }
 
+    private void whichButtonToCreate()
+    {
+        ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
+        ChooseApps_StopService.invalidate();
+        if(!(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2()))
+        {
+            makePermissionsNeededButton();
+        }
+        else if (!dtsb.isBlockSet())
+        {
+            makeChooseAppsButton();
+        }
+        else if(!dtsb.getPassword().equals(""))
+        {
+            makeStopLockingButton();
+        }
+        else
+        {
+            makeCantStopButton();
+        }
+    }
 
+    private void makeChooseAppsButton()
+    {
+        ChooseApps_StopService.setEnabled(true);
+        ChooseApps_StopService.setBackgroundColor(getResources().getColor(R.color.colorGreen));
+        ChooseApps_StopService.setTextColor(getResources().getColor(R.color.colorWhite));
+        ChooseApps_StopService.setText(R.string.choose_apps);
+        ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(thisContext, AppsListTemp.class));
+            }
+        });
+    }
 
+    private void makeStopLockingButton()
+    {
+        ChooseApps_StopService.setEnabled(true);
+        ChooseApps_StopService.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        ChooseApps_StopService.setTextColor(getResources().getColor(R.color.colorWhite));
+        ChooseApps_StopService.setText(R.string.stop_locking_apps);
+        ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(stopLockIntent);
+            }});
+    }
+
+    private void makeCantStopButton()
+    {
+        ChooseApps_StopService.setText(R.string.cant_stop_locking);
+        ChooseApps_StopService.setEnabled(false);
+    }
+
+    private void makePermissionsNeededButton()
+    {
+        ChooseApps_StopService.setText(R.string.we_need_permissions);
+        ChooseApps_StopService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                permsChecker.makeCheck();
+            }
+        });
+    }
 
 }

@@ -8,8 +8,8 @@ public interface PermissionsCheck {
     final int PERMISSION_REQUEST_CODE = 200;
     Activity activity = null;
     String[] retrievePermsFromManifest();
-    void requestPerms(String[] permissions, int permission_request_code);
+    void requestPerms();
     boolean checkPermissions(String[] permissions);
-    void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener);
+    void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener, DialogInterface.OnClickListener cancelListener);
 
 }
