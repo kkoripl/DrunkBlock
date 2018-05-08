@@ -1,6 +1,6 @@
 Project Name: DrunkBlock
 
-Description: App made for android users, which use to party a lot, but want to be safe to not doing silly thinks on its phone while drunk.  
+Description: App made for android users, who use to party a lot, but want to be safe to not doing silly thinks on its phone while drunk.  
              Just like app lockers, this app will lock your phone to let you fully enjoy the party.
              
 Installation: Compile project with Android Studio or other useful programmes and connected to your phone build it on.
