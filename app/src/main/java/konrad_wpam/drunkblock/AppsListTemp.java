@@ -21,6 +21,9 @@ import java.util.List;
 
 import drunkblock_listview.AppsListViewAdapter;
 
+/**
+ * AppsListTemp - okno wyboru aplikacji do blokowania
+ */
 public class AppsListTemp extends Activity
 {
     private Context thisContext = this;
@@ -33,14 +36,15 @@ public class AppsListTemp extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.apps_list);
-        mListView = (ListView) findViewById(R.id.apps_list);
-        dtsb.setAllApps(loadApps(dtsb.getAllApps()));
-        adapter = new AppsListViewAdapter(this, dtsb.getAllApps());
-        mListView.setAdapter(adapter);
+        mListView = (ListView) findViewById(R.id.apps_list); // pobierz widok
+        dtsb.setAllApps(loadApps(dtsb.getAllApps())); // zainstalowane aplikacje
+        adapter = new AppsListViewAdapter(this, dtsb.getAllApps()); // stworz adapter, czyli dzialania ukryte pod widokiem
+        mListView.setAdapter(adapter); // nastaw adpater
         addOnListViewClickListener(mListView);
         addToSettingsButtonClickListener((Button) findViewById(R.id.lv_to_settings),this);
     }
 
+    // Co ma sie dziac jesli wcisniemy panel listy?
     private void addOnListViewClickListener(final ListView mListView)
     {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -51,13 +55,13 @@ public class AppsListTemp extends Activity
                 TextView ifAppLocked = (TextView) view.findViewById(R.id.locked_unlocked_text);
                 if(dtsb.getAllApps().get(position).getIfLocked())
                 {
-                    dtsb.getAllApps().get(position).setIfLocked(false);
+                    dtsb.getAllApps().get(position).setIfLocked(false); // informujemy, ze apka ma nie byc blokowana
                     ifAppLocked.setText(R.string.unlocked);
-                    padlock.setImageResource(R.drawable.unlocked_locker);
+                    padlock.setImageResource(R.drawable.unlocked_locker); // nastawiamy obrazek
                 }
                 else
                 {
-                    dtsb.getAllApps().get(position).setIfLocked(true);
+                    dtsb.getAllApps().get(position).setIfLocked(true); // informujemy, ze apka ma byc blokowana
                     ifAppLocked.setText(R.string.locked);
                     padlock.setImageResource(R.drawable.locked_locker);
                 }
@@ -65,17 +69,18 @@ public class AppsListTemp extends Activity
         });
     }
 
+    // Co ma sie dziac jesli zechcemy przejsc do ustawien blokady
     private void addToSettingsButtonClickListener(Button button, final Activity activity)
     {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dtsb.setAppsToBlockPkgNames(null);
-                ArrayList<String> appsBlocked = getAppsToBlock(dtsb.getAllApps());
-                if(appsBlocked.size()>1 || dtsb.getDialerToBeBlocked())
+                dtsb.setAppsToBlockPkgNames(null); // zerujemy liste aplikacji do blokowania
+                ArrayList<String> appsBlocked = getAppsToBlock(dtsb.getAllApps()); // pobieramy nowa
+                if(appsBlocked.size()>0 || dtsb.getDialerToBeBlocked()) // jesli jsst wieksza od 0 lub wybralismy do blokowania telefon - nie ma go na liscie
                 {
-                    dtsb.setAppsToBlockPkgNames(appsBlocked);
-                    startActivity(new Intent(activity, Settings.class));
+                    dtsb.setAppsToBlockPkgNames(appsBlocked); // wszystko gra nastaw apki do blokowania
+                    startActivity(new Intent(activity, Settings.class)); // przejdz do ustawien
                 }
                 else
                 {
@@ -85,6 +90,7 @@ public class AppsListTemp extends Activity
         });
     }
 
+    // Metoda pobierajaca zainstalowane aplikacje
     private ArrayList<AppData> loadApps( ArrayList<AppData> allApps)
     {
         boolean contains = false;
@@ -94,32 +100,33 @@ public class AppsListTemp extends Activity
         List<ResolveInfo> availableActivities = manager.queryIntentActivities(i,0);
         for( ResolveInfo info: availableActivities)
         {
-            if(allApps.size()!=0) {
+            if(allApps.size()!=0) { // jesli lista aplikacji juz byla zainicjalizowana to sprawdzmy czy cos nie przybylo
                 contains = false;
                 for (AppData app : allApps) {
-                    if (app.getAppPkgName().equals(info.activityInfo.packageName)) {
+                    if (app.getAppPkgName().equals(info.activityInfo.packageName) && app.getAppLabel().equals((String) info.loadLabel(manager))) {
                         contains = true;
                         break;
                     }
                 }
             }
+            // jesli zainicjowana i apki tam nie ma - dodaj
+            // jesli lista niezainicjowana - dodaj
+            // wszystko o ile nie dodajemy naszej aplikacji
             if(((allApps.size()!=0 && contains == false) || allApps.size()==0) && !info.activityInfo.packageName.equals(getString(R.string.this_app_package)))
             {
-                if(info.activityInfo.packageName.contains("clock")) clockPkg = info.activityInfo.packageName;
-                else
-                {
-                    AppData newApp = new AppData();
-                    newApp.setAppLabel((String) info.loadLabel(manager));
-                    newApp.setAppPkgName(info.activityInfo.packageName);
-                    newApp.setIcon(info.activityInfo.loadIcon(manager));
-                    allApps.add(newApp);
-                }
+                AppData newApp = new AppData();
+                newApp.setAppLabel((String) info.loadLabel(manager));
+                newApp.setAppPkgName(info.activityInfo.packageName);
+                newApp.setIcon(info.activityInfo.loadIcon(manager));
+                allApps.add(newApp);
             }
         }
         return allApps;
 
     }
 
+    // Metoda nastawiajaca liste aplikacji do blokowania
+    // Jesli znajdzie sie na niej telefon to nie dodajemy go do listy, a odznaczamy odpowiednie pole
     private ArrayList<String> getAppsToBlock(ArrayList<AppData> apps)
     {
         dtsb.setDialerToBeBlocked(false);
@@ -135,10 +142,10 @@ public class AppsListTemp extends Activity
                 else appsToBlock.add(app.getAppPkgName());
             }
         }
-        appsToBlock.add(clockPkg);
         return appsToBlock;
     }
 
+    // Metoda pobierajaca nazwe domyslnej aplikacji do dzwonienia
     private String getDefaultDialerPkg()
     {
         TelecomManager manger = (TelecomManager) getSystemService(TELECOM_SERVICE);

@@ -21,6 +21,9 @@ import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 import static android.Manifest.permission.PROCESS_OUTGOING_CALLS;
 import static android.Manifest.permission.READ_PHONE_STATE;
 
+/**
+ * Klasa sprawdzajaca nadanie uprawnien
+ */
 public class PermissionsChecker implements PermissionsCheck{
 
     Activity activity;
@@ -37,8 +40,6 @@ public class PermissionsChecker implements PermissionsCheck{
 
     public void makeCheck()
     {
-        boolean permissionsGiven1 = false;
-        boolean permissionsGiven2 = false;
         if(!checkPermissions(PERMISSIONS))
         {
             showMessageOKCancel(MainActivity.getContext().getString(R.string.other_please),

@@ -1,36 +1,30 @@
 package konrad_wpam.drunkblock;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import static android.Manifest.permission.CALL_PHONE;
-import static android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
-import static android.Manifest.permission.PROCESS_OUTGOING_CALLS;
-import static android.Manifest.permission.READ_PHONE_STATE;
-
-
+/**
+ * MainActivity - Activity wyswietlajaca powitalny ekran aplikacji
+ *
+ * Instrukcja oraz przycisk bedacy zaleznie od sytuacji:
+ * - przejsciem do wyboru blokowanych aplikacji;
+ * - proba zakonczenia blokowania;
+ * - przejsciem do prosb o nadanie uprawnienia;
+ * - informacja, ze nie ustawiono hasla i zakonczenie blokowania skonczy sie dopiero po uplywie czasu
+ *
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static Context thisContext;
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
     public static final int PERMISSION_REQUEST_CODE = 200;
-    private String msg = "Android : ";
     private Intent stopLockIntent;
-   /* private static final String[] PERMISSIONS = new String[] {
-            KILL_BACKGROUND_PROCESSES,
-            CALL_PHONE,
-            READ_PHONE_STATE,
-            PROCESS_OUTGOING_CALLS
-    };*/
     private PermissionsChecker permsChecker = new PermissionsChecker(this);
     private Button ChooseApps_StopService;
     private boolean permsChecked = false;
@@ -46,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (stopLockIntent == null) stopLockIntent = createStopLockIntent(stopLockIntent);
+
+        // sprawdzamy uprawnienia
         if(!permsChecked)
         {
             permsChecker.makeCheck();
@@ -53,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // metoda odpowiadajaca na prosbe o nadanie uprawnienia - okienko deny / allow
+    // permission_granted = wcisniecie allow
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
@@ -72,21 +70,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if(ifGranted)
                 {
+                    DataToSetBlock.getDataToBlockInstance().setPermissionsGiven1(true);
                     whichButtonToCreate();
-                   /* if(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2())
-                    {
-                        if (!dtsb.isBlockSet()) {
-                            makeChooseAppsButton();
-                        } else {
-                            if(!dtsb.getPassword().equals("")) {
-                                makeStopLockingButton();
-                            }
-                            else
-                            {
-                                makeCantStopButton();
-                            }
-                        }
-                    }*/
                 }
                 else
                 {
@@ -99,30 +84,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        //jesli nie sprawdzilismy uprawnien to sprawdzamy
         if(!permsChecked)
         {
             permsChecker.makeCheck();
             permsChecked = true;
         }
+        //zaleznie od sytuacji renderujemy przycisk w odpowiedniej formie
         whichButtonToCreate();
-        /*ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
-        ChooseApps_StopService.invalidate();
-            if(!(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2()))
-            {
-                makePermissionsNeededButton();
-            }
-            else if (!dtsb.isBlockSet()) {
-                makeChooseAppsButton();
-            } else {
-                if(!dtsb.getPassword().equals("")) {
-                    makeStopLockingButton();
-                }
-                else
-                {
-                    makeCantStopButton();
-                }
-            }*/
-        Log.d(msg,"ON Start");
     }
 
     @Override
@@ -135,59 +104,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         whichButtonToCreate();
-       /* ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);
-        ChooseApps_StopService.invalidate();
-        if(!(dtsb.isPermissionsGiven1() && dtsb.isPermissionsGiven2()))
-        {
-           makePermissionsNeededButton();
-        }
-        else if (!dtsb.isBlockSet())
-            {
-                makeChooseAppsButton();
-            } else {
-                if(!dtsb.getPassword().equals("")) {
-                    makeStopLockingButton();
-                }
-                else
-                {
-                    makeCantStopButton();
-                }
-            }*/
-        Log.d(msg,"ON RESUME");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         permsChecked = false;
-        Log.d(msg,"ON Pause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         permsChecked = false;
-        Log.d(msg,"ON Stop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(msg,"ON Destroy");
+        stopService(dtsb.getTimeCheckIntent());
+        stopService(dtsb.getPassServiceIntent());
     }
 
-    private boolean checkPermission(String[] permissions)
-    {
-        for (String permission : permissions)
-        {
-            if(ContextCompat.checkSelfPermission(getApplicationContext(),permission) == PackageManager.PERMISSION_DENIED)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
+    //Stworzenie intentu do zakonczenia blokowania przyciskiem z menu
     private Intent createStopLockIntent(Intent intent)
     {
         intent = new Intent(getString(R.string.password_window_act)); //new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
@@ -196,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         return intent;
     }
 
+    // metoda tworzaca przyciski zaleznie od sytuacji
     private void whichButtonToCreate()
     {
         ChooseApps_StopService = (Button) findViewById(R.id.to_choose_apps);

@@ -21,12 +21,15 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
+/**
+ * Settings - activity odpowiedzialne za wyrenderowanie okna ustawien blokady
+ */
 public class Settings extends Activity
 {
-    private static String NOTIF_CHANNEL_ID = "db_notfs";
+    private static String NOTIF_CHANNEL_ID = "db_notfs"; // od androida 27 trzeba tworzyc kanal powiadomien przed powiadomieniami - jego nazwa
     private static int FRIEND_NOTF_ID = 500;
     private static int HOST_NOTIF_ID = 501;
-    private static int DB_NOTIF_ID = 502;
+    private static int DB_NOTIF_ID = 502; // wszystkie trzy potrzebne do identyfikacji powiadomien
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
     private Context thisContext = this;
     private Button block_button;
@@ -34,7 +37,6 @@ public class Settings extends Activity
     private Switch pass_off_on;
     private EditText password, host_number, friend_number;
     private boolean isNotfChannelSet = false;
-    //private Validator validator
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,7 @@ public class Settings extends Activity
         initViewObjects();
     }
 
+    // inicjacja elementow okna
     private void initViewObjects()
     {
         block_hours = (Spinner) findViewById(R.id.block_duration);
@@ -55,6 +58,8 @@ public class Settings extends Activity
         addBlockButtonListener();
     }
 
+    // wcisnelismy przycisk set block - pobieramy dane do blokady, wpierw zerujac wczesniejsze
+    // numer gospodarza, kumpla jesli sa oraz czas blokady
     private void getBlockData(DataToSetBlock dtsb)
     {
         dtsb.nullSettingsData();
@@ -69,6 +74,7 @@ public class Settings extends Activity
         }
     }
 
+    // nastawienie eventow, ktore maja sie wydarzyc po aktywacji lub dezaktywacji hasla
     private void addPassOffOnListener()
     {
         pass_off_on.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -90,6 +96,7 @@ public class Settings extends Activity
         });
     }
 
+
     private void addBlockButtonListener()
     {
         block_button.setOnClickListener(new View.OnClickListener() {
@@ -97,10 +104,10 @@ public class Settings extends Activity
             public void onClick(View v) {
                 getBlockData(dtsb);
                 //if((pass_off_on.isChecked() && !password.getText().toString().equals("")) || !pass_off_on.isChecked())
-                if(Validator.validateSettingsPassword(pass_off_on.isChecked(),password.getText().toString()))
+                if(Validator.validateSettingsPassword(pass_off_on.isChecked(),password.getText().toString())) // haslo aktywowane i podane
                 {
-                    if(Validator.validatePhoneNumber(dtsb.getFriend_number())) {
-                        if(Validator.validatePhoneNumber(dtsb.getHost_number())) {
+                    if(Validator.validatePhoneNumber(dtsb.getFriend_number())) { // numer kumpla w dobrym formacie
+                        if(Validator.validatePhoneNumber(dtsb.getHost_number())) { // numer gospodarza - || -
                             dtsb.setPassword(password.getText().toString());
                             dtsb.setBlockSet(true);
                             dtsb.setPassServiceIntent(new Intent(thisContext, PasswordService.class));
@@ -114,9 +121,9 @@ public class Settings extends Activity
                                 makeNotifications(NOTIF_CHANNEL_ID, getString(R.string.db_running), dtsb.getBlockTill());
                             }
                             Toast.makeText(thisContext, getString(R.string.block_set) + " " + dtsb.getBlockTill(), Toast.LENGTH_SHORT).show();
-                            startService(dtsb.getPassServiceIntent());
-                            startService(dtsb.getTimeCheckIntent());
-                            startActivity(new Intent(thisContext, MainActivity.class));
+                            startService(dtsb.getPassServiceIntent()); // wystartuj blokowanie
+                            startService(dtsb.getTimeCheckIntent()); // wystartuj odmierzanie czasu do konca blokowania
+                            startActivity(new Intent(thisContext, MainActivity.class)); // wroc do ekranu glownego
                         }
                         else Toast.makeText(thisContext,R.string.hostNo_not_correct,Toast.LENGTH_SHORT).show();
                     }
@@ -127,6 +134,9 @@ public class Settings extends Activity
         });
     }
 
+    // Tworzymy notyfikacje
+    // - jedna mowi o tym, ze blokady aktywne i do kiedy trwaja
+    // - a pozostale pokazuja, ze mozesz zadzwonic jesli podales numery
     private void makeNotifications(String channel_id, String which,String blockTill)
     {
         Intent intent;
@@ -163,8 +173,8 @@ public class Settings extends Activity
             intent = new Intent(thisContext,MainActivity.class);
             notifBuilder = new NotificationCompat.Builder(thisContext, channel_id)
                     .setSmallIcon(R.drawable.locked_locker)
-                    .setContentTitle(getString(R.string.db_running) + " " + blockTill)
-                    .setContentText(getString(R.string.click_to_launch))
+                    .setContentTitle(getString(R.string.db_running))
+                    .setContentText(getString(R.string.block_set) + " " + blockTill)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(createPendingIntent(intent))
                     .setOngoing(true);
@@ -172,6 +182,7 @@ public class Settings extends Activity
         }
     }
 
+    // od androida 27 przed stworzeniem powiadomien trzeba stworzyc ich kanal - robimy go
     private boolean makeNotificationChannel(String channel_id)
     {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -189,6 +200,7 @@ public class Settings extends Activity
         return isNotfChannelSet;
     }
 
+    // tworzymy pending intent, czyli akcje, ktora wykonana notyfikacja po jej kliknieciu
     private PendingIntent createPendingIntent(Intent intent)
     {
         return PendingIntent.getActivities(thisContext, 0, new Intent[]{intent}, 0);

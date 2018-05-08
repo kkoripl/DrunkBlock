@@ -6,6 +6,9 @@ import android.telephony.TelephonyManager;
 
 import java.lang.reflect.Method;
 
+/**
+ * CallsReceiver - listener badajacy stan polaczen telefonicznych wykonywanych w telefonie
+ */
 public class CallsReceiver extends PhoneStateListener
 {
     private String prev_number;
@@ -13,7 +16,7 @@ public class CallsReceiver extends PhoneStateListener
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
 
     @Override
-    public void onCallStateChanged(int state, String incomingNumber)
+    public void onCallStateChanged(int state, String incomingNumber) // jesli stan rozmowy sie zmienil - reaguj
     {
 
        // prev_state = state;
@@ -31,17 +34,18 @@ public class CallsReceiver extends PhoneStateListener
         {
             switch(state)
             {
-                case TelephonyManager.CALL_STATE_IDLE:
+                case TelephonyManager.CALL_STATE_IDLE: // pusto - nie ma rozmowy - nie rob nic
                 {
                     prev_state=state;
                 }
                 break;
 
-                case TelephonyManager.CALL_STATE_OFFHOOK:
+                case TelephonyManager.CALL_STATE_OFFHOOK: // jesli rozmowa trwa
                 {
-                   if(!(prev_state == TelephonyManager.CALL_STATE_RINGING ||
-                           (prev_state== TelephonyManager.CALL_STATE_IDLE &&
-                                   (incomingNumber.equals(dtsb.getFriend_number()) || incomingNumber.equals(dtsb.getHost_number())))))
+                   if(!(prev_state == TelephonyManager.CALL_STATE_RINGING || // przed chwila nasz telefon dzwonil - ktos dzwonil do nas odebralismy - pusc
+                           (prev_state== TelephonyManager.CALL_STATE_IDLE && // przed chwila nie bylo rozmowy, a teraz jest - my dzwonimy
+                                   (incomingNumber.equals(dtsb.getFriend_number()) || incomingNumber.equals(dtsb.getHost_number()) // jesli numer kumpla lub gospodarza - pusc z listy
+                                           || incomingNumber.equals(MainActivity.getContext().getString(R.string.alarm_phone)))))) // jesli numer awaryjny - pusc
                    {
                        killCall(MainActivity.getContext());
                    }
@@ -59,6 +63,7 @@ public class CallsReceiver extends PhoneStateListener
         }
     }
 
+    //Metoda przerywajaca wykonywane polaczenie
     public boolean killCall(Context context) {
         try {
             // Get the boring old TelephonyManager

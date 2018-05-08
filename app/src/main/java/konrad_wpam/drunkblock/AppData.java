@@ -2,6 +2,9 @@ package konrad_wpam.drunkblock;
 
 import android.graphics.drawable.Drawable;
 
+/**
+ * Klasa bedaca przechowalnia informacji o aplikacjach z telefonu - wszystko co potrzebne do zrobienia okna z lista aplikacji
+ */
 public class AppData {
     private String appLabel;
     private String appPkgName;

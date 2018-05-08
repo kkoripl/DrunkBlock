@@ -1,5 +1,8 @@
 package konrad_wpam.drunkblock;
 
+/**
+ *  Klasa implementujaca metody do sprawdzania poprawnosci poszczegolnych elementow
+ */
 public class Validator {
 
 
@@ -15,7 +18,7 @@ public class Validator {
         if(passwordInput.length()==passwordSet.length())
         {
             for (int i = 0; i < passwordSet.length(); i++) {
-                //  System.out.println(i + " IN: " + passwordInput.charAt(i) + " || " + passwordSet.charAt(passwordSignsOrder[i] - 1));
+                 //System.out.println(i + " IN: " + passwordInput.charAt(i) + " || " + passwordSet.charAt(passwordSignsOrder[i] - 1));
                 if (passwordInput.charAt(i) != passwordSet.charAt(passwordSignsOrder[i] - 1)) {
                     return false;
                 }

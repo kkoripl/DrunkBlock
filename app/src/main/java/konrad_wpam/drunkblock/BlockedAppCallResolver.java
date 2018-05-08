@@ -13,6 +13,9 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * BlockedAppCallResolver - okienko wpisywania hasla w razie proby uruchomienia zablokowanej apki
+ */
 public class BlockedAppCallResolver extends android.app.Activity
 {
     public static int STOP_LOCKING = 1;
@@ -21,13 +24,12 @@ public class BlockedAppCallResolver extends android.app.Activity
     private DataToSetBlock dtsb = DataToSetBlock.getDataToBlockInstance();
     private int[] passwordSignsOrder;
     private AlertDialog passwordWindow;
-    //private Validator validator = new Validator();
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         Intent intent = getIntent();
-        whenWantWindow = intent.getIntExtra(String.valueOf(R.string.when_password_window),TRY_TO_UNLOCK_APP);
+        whenWantWindow = intent.getIntExtra(String.valueOf(R.string.when_password_window),TRY_TO_UNLOCK_APP); // probujemy odblokowac aplikacje
         super.onCreate(savedInstanceState);
         if (whenWantWindow == TRY_TO_UNLOCK_APP) {
             if (!dtsb.getPassword().equals("")) {
@@ -37,7 +39,7 @@ public class BlockedAppCallResolver extends android.app.Activity
                 actionIfPasswordFailedToUnlock();
                 finish();
             }
-        } else {
+        } else { //chcemy zakonczyc blokowanie wszystkich aplikacji
             passwordWindow = createPasswordWindow(whenWantWindow);
             passwordWindow.show();
         }
@@ -71,18 +73,17 @@ public class BlockedAppCallResolver extends android.app.Activity
                 actionIfPasswordFailedToUnlock();
             }
         });
-        passwordSignsOrder = samplingWithoutReplacement(dtsb.getPassword().length());
+        passwordSignsOrder = samplingWithoutReplacement(dtsb.getPassword().length()); // losujemy kolejnosc znakow hasla do wpisania
         TextView title = (TextView) mView.findViewById(R.id.pw_title);
         title.setText(getString(R.string.signs_order) + " " + Arrays.toString(passwordSignsOrder));
         builder.setView(mView);
         final AlertDialog ad = builder.create();
 
-        if(when == TRY_TO_UNLOCK_APP) {
+        if(when == TRY_TO_UNLOCK_APP) { // probujemy odblokowac aplikacje
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //if (!checkPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
-                    if(Validator.validateFilledPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
+                    if(!Validator.validateFilledPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
                         actionIfPasswordFailedToUnlock();
                     else {
                         finish();
@@ -90,16 +91,14 @@ public class BlockedAppCallResolver extends android.app.Activity
                 }
             });
         }
-        else if(when == STOP_LOCKING)
+        else if(when == STOP_LOCKING) //chcemy zakonczyc blokowanie wszystkich aplikacji
         {
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //if (checkPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
                     if(Validator.validateFilledPassword(passwordField.getText().toString(), dtsb.getPassword(), passwordSignsOrder))
                     {
                         stopLocking();
-
                     }
                     finish();
                 }
@@ -108,21 +107,7 @@ public class BlockedAppCallResolver extends android.app.Activity
         return ad;
     }
 
-    /*private boolean checkPassword(String passwordInput, String passwordSet, int[] passwordSignsOrder)
-    {
-        if(passwordInput.length()==passwordSet.length())
-        {
-            for (int i = 0; i < passwordSet.length(); i++) {
-              //  System.out.println(i + " IN: " + passwordInput.charAt(i) + " || " + passwordSet.charAt(passwordSignsOrder[i] - 1));
-                if (passwordInput.charAt(i) != passwordSet.charAt(passwordSignsOrder[i] - 1)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }*/
-
+    //Losujemy kolejnosc znakow hasla do wpisania
     private int[] samplingWithoutReplacement(int passwordSize)
     {
        int[] passwordSignsOrder = new int[passwordSize];
@@ -142,6 +127,7 @@ public class BlockedAppCallResolver extends android.app.Activity
        return passwordSignsOrder;
     }
 
+    // Jak pomylimy haslo lub wcisniemy cancel - wroc do menu glownego
     private void actionIfPasswordFailedToUnlock()
     {
         //backToMainScreen()
@@ -153,7 +139,7 @@ public class BlockedAppCallResolver extends android.app.Activity
 
     private void stopLocking()
     {
-        stopService(dtsb.getTimeCheckIntent());
-        stopService(dtsb.getPassServiceIntent());
+        stopService(dtsb.getTimeCheckIntent()); // przerwij sprawdzanie czasu
+        stopService(dtsb.getPassServiceIntent()); // przerwij blokowanie
     }
 }

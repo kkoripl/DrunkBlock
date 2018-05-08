@@ -1,7 +1,6 @@
 package konrad_wpam.drunkblock;
 
 import android.app.ActivityManager;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -11,7 +10,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
-import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
@@ -23,23 +21,22 @@ import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
- 	import android.telecom.Call;
-
-import static java.lang.Thread.sleep;
 
 /**
  * Created by Konrad on 2018-03-23.
  */
 
+/**
+ * Serwis stawiajacy blokade
+ */
+
 public class PasswordService extends Service
 {
-    private String dialer = "com.android.dialer";
     private TelephonyManager telephony = (TelephonyManager) MainActivity.getContext().getSystemService(Context.TELEPHONY_SERVICE);
     private CallsReceiver cr;
     private DataToSetBlock dtsb;
     private Intent helperIntent = new Intent();
     private int timeForTopActivity = 1000 * 5; // 5 sekund
-    private final Context context = this;
     private String lastActivity;
     private Timer timer;
     public PasswordService() {
@@ -76,16 +73,17 @@ public class PasswordService extends Service
                 }
 
                 if(activePackages != null) {
-                    System.out.println("AKTYWNE PAKIETY!!!!");
+                    //System.out.println("AKTYWNE PAKIETY!!!!");
                     for (String activePackage : activePackages) {
                         if(!activePackage.equals(lastActivity))
                         {
-                            System.out.println("NOWA AKTYWNOSC! ==> " + activePackage);
+                           // System.out.println("NOWA AKTYWNOSC! ==> " + activePackage);
                             if(lastActivity!= null && !lastActivity.equals(getString(R.string.this_app_package)) && dtsb.getAppsToBlockPkgNames().contains(activePackage))
                             {
-                                System.out.println("ZNALEZIONE DIALERY!!!!");
+                                //System.out.println("ZNALEZIONE DIALERY!!!!");
                                 helperIntent = new Intent(getString(R.string.password_window_act));//new Intent(BlockedAppCallResolver.PASSWORD_WINDOW_ACT);
                                 helperIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                helperIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 helperIntent.putExtra(getString(R.string.when_password_window), BlockedAppCallResolver.TRY_TO_UNLOCK_APP);
                                 startActivity(helperIntent);
                             }
@@ -96,10 +94,10 @@ public class PasswordService extends Service
                         }
                     }
                 }
-                else
+               /* else
                 {
                     System.out.println("NULL");
-                }
+                }*/
 
 
             }

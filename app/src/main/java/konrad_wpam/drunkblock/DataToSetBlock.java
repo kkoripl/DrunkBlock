@@ -7,22 +7,24 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Klasa przechowujaca informacje o zakladanej blokadzie - singleton
+ */
 public class DataToSetBlock
 {
     private static DataToSetBlock instance;
-    private String password="";
-    private String blockTill;
-    private ArrayList<AppData> allApps = new ArrayList<AppData>();
-    private ArrayList<String> appsToBlockPkgNames = new ArrayList<String>();
-    private String friend_number;
-    private String host_number;
-    private boolean dialerToBeBlocked = false;
-    private boolean blockSet = false;
-    private Intent passServiceIntent;
-    private Intent timeCheckIntent;
-    private boolean permissionsGiven1 = false;
-    private boolean permissionsGiven2 = false;
-  //  private CallsReceiver callsReceiver;
+    private String password=""; // haslo
+    private String blockTill; // do kiedy blokada
+    private ArrayList<AppData> allApps = new ArrayList<AppData>(); // wszystkie apki z telefonu
+    private ArrayList<String> appsToBlockPkgNames = new ArrayList<String>(); // pakiety aplikacji do blokowania
+    private String friend_number; // telefon kumpla
+    private String host_number; // telefon gospodarza
+    private boolean dialerToBeBlocked = false; // oznaczenie czy mamy blokowac aplikacje telefonu
+    private boolean blockSet = false; // czy blok ustawiony
+    private Intent passServiceIntent; // intent uruchamianego serwisu blokady
+    private Intent timeCheckIntent; // intent uruchamianego serwisu sprawdzenia czy czas blokad juz nie minal
+    private boolean permissionsGiven1 = false; // info czy uprawnienie na sprawdzenie telefonu zostalo nadane
+    private boolean permissionsGiven2 = false; // info czy uprawnienie na Usage Stats zostalo nadane
 
 
     private DataToSetBlock() {
@@ -121,14 +123,6 @@ public class DataToSetBlock
     public void setTimeCheckIntent(Intent timeCheckIntent) {
         this.timeCheckIntent = timeCheckIntent;
     }
-
-  /*  public CallsReceiver getCallsReceiver() {
-        return callsReceiver;
-    }
-
-    public void setCallsReceiver(CallsReceiver callsReceiver) {
-        this.callsReceiver = callsReceiver;
-    }*/
 
     public boolean getDialerToBeBlocked() {
         return dialerToBeBlocked;
